@@ -2,8 +2,8 @@ import numpy as np
 from copy import copy
 
 
-class GameError(Exception):
-    """Subclass base exception for code clarity. """
+class gameerror(exception):
+    """subclass base exception for code clarity. """
     pass
 
 
@@ -24,13 +24,13 @@ class Board(object):
         self._board_state = self.get_board_state()
 
         if self.moves == []:
-            self.player = self.PLAYER_1
-        elif moves[-1][0] == self.PLAYER_1:
-            self.player = self.PLAYER_2
-        elif moves[-1][0] == self.PLAYER_2:
-            self.player = self.PLAYER_1
+            self.player = self.player_1
+        elif moves[-1][0] == self.player_1:
+            self.player = self.player_2
+        elif moves[-1][0] == self.player_2:
+            self.player = self.player_1
         else:
-            raise GameError('Wrong move is found in moves!')
+            raise gameerror('wrong move is found in moves!')
             
     def get_board_state(self):
         state = np.empty((self.height, self.width), dtype='str')
@@ -39,9 +39,8 @@ class Board(object):
                 if cell in [self.BLANK_SPACE, self.PLAYER_1, self.PLAYER_2]:
                     state[i, j] = cell
                 else:
-                    raise GameError("Illegal input board!")
+                    raise gameerror("illegal input board!")
         
-        print(state)
         return state
 
     def on_the_board(self, move):
@@ -62,7 +61,8 @@ class Board(object):
     def apply_move(self, move):
         if self.move_is_legal(move):
             self._board_state[move[0], move[1]] = self.player
-            self.board = '\n'.join([''.join(row) for row in self._board_state]) + '\n'
+            self.board = '\n'.join(
+                [''.join(row) for row in self._board_state]) + '\n'
             self.moves.append((self.player, tuple(move)))
             self.moved = True
         else:

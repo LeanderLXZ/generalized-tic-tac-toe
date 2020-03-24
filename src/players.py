@@ -89,7 +89,7 @@ class MinimaxPlayer():
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
-        self.TIMER_THRESHOLD = timeout
+        self.timer_threshold = timeout
 
     def get_move(self, board, time_left):
         """Search for the best move from the available legal moves and return a
@@ -98,7 +98,7 @@ class MinimaxPlayer():
         Parameters
         ----------
         board : board.Board
-            An instance of the generalized TIC-TAC-TOE board `Board` class 
+            A instance of the generalized TIC-TAC-TOE board `Board` class 
             representing the current board state.
 
         time_left : callable
