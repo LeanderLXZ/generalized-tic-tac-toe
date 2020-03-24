@@ -1,3 +1,4 @@
-/*.code-workspace
-/.vscode
-/.DS_Store
+*.code-workspace
+.vscode
+.DS_Store
+__pycache__/

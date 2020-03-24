@@ -33,12 +33,8 @@ class RLPlayer():
         self.q_table = self.get_q_table(filename)
 
     def get_move(self, board, time_left):
-        
-        # '----------\n----------\n----------\n----------\n----------\n'
-        board_str = board.board
-        # '??????????????x????????????o??????????????????????'
-        board_str = ''.join(board_str.split('\n')).replace(
-            '-', '?').replace('X', 'x').replace('O', 'o')
+
+        board_str = ''.join(board.board.split('\n'))
         action = self.choose_action(board_str, board)
         if action:
             n = board.width
@@ -59,18 +55,8 @@ class RLPlayer():
             return None
     
     def get_q_table(self, filename):
-        q_table = {}
-        f = open(filename, 'r+')
-        lines = f.readlines()
-        for line in lines:
-            state = line.split(';')[0]
-            action_value = line.split(';')[1].split(',')
-            q_table[state] = {}
-            for i in range(len(action_value)-1):
-                action = action_value[i].split(':')[0][1:]
-                value = action_value[i].split(':')[1][1:]
-                q_table[state][int(action)] = float(value)
-        return q_table
+        with open(filename, 'r') as f:
+            return eval(f.read())
 
     def get_action(self, state, value):
         
