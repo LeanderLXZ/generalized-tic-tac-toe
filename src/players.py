@@ -8,10 +8,21 @@ class SearchTimeout(Exception):
     pass
 
 
-class HumanPlayer():
-
+class Player(object):
+    
+    TIMER_THRESHOLD = 10
+    
     def __init__(self):
-        pass
+        self.player_mark = None
+
+    def assign_player_mark(self, player_mark):
+        self.player_mark = player_mark
+        
+    def get_move(self, board, time_left):
+        raise NotImplementedError
+
+
+class HumanPlayer(Player):
 
     def get_move(self, board, time_left):
         input_move = input('Input a move (format: tuple): ')
@@ -27,10 +38,11 @@ class HumanPlayer():
         return input_move
 
 
-class RLPlayer():
+class RLPlayer(Player):
     
     def __init__(self, filename):
         self.q_table = self.get_q_table(filename)
+        self.player_mark = None
 
     def get_move(self, board, time_left):
 
@@ -65,7 +77,7 @@ class RLPlayer():
                 return k
 
 
-class MinimaxPlayer():
+class MinimaxPlayer(Player):
     """Class for minimax agents.
 
     Parameters
@@ -90,6 +102,7 @@ class MinimaxPlayer():
         self.score = score_fn
         self.time_left = None
         self.timer_threshold = timeout
+        self.player_mark = None
 
     def get_move(self, board, time_left):
         """Search for the best move from the available legal moves and return a
@@ -124,7 +137,7 @@ class MinimaxPlayer():
             return self.minimax(board, self.search_depth)
 
         except SearchTimeout:
-            print('Search timeout!')
+            print('[W] Search timeout!')
             return best_move
     
     def minimax(self, board, depth):
@@ -152,7 +165,7 @@ class MinimaxPlayer():
         best_score = float("-inf")
         best_move = (-1, -1)
         for m in board.legal_moves:
-            print('Now searing move {} ...'.format(m))
+            print('Now searching move {} ...'.format(m))
             v = self.min_value(board.get_moved_board(m), depth - 1)
             if v > best_score:
                 best_score = v
@@ -167,10 +180,10 @@ class MinimaxPlayer():
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if board.is_winner:
+        if board.is_winner(self.player_mark):
             return float("inf")
         if depth <= 0:
-            return self.score(board)
+            return self.score(board, self.player_mark)
         v = float("inf")
         for m in board.legal_moves:
             v = min(v, self.max_value(board.get_moved_board(m), depth - 1))
@@ -184,10 +197,10 @@ class MinimaxPlayer():
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if board.is_loser:
+        if board.is_loser(self.player_mark):
             return float("-inf")
         if depth <= 0:
-            return self.score(board)
+            return self.score(board, self.player_mark)
         v = float("-inf")
         for m in board.legal_moves:
             v = max(v, self.min_value(board.get_moved_board(m), depth - 1))
@@ -229,11 +242,13 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
         try:
             search_depth = 1
-            while True:
+            while search_depth <= len(board.legal_moves):
+                print('Now searching depth:', search_depth)
                 best_move = self.alphabeta(board, search_depth)
                 search_depth += 1
         except SearchTimeout:
-            print('Search timeout!')
+            print('[W] Search timeout!')
+        finally:
             return best_move
 
     def alphabeta(self, board, depth, alpha=float("-inf"), beta=float("inf")):
@@ -282,10 +297,10 @@ class AlphaBetaPlayer(MinimaxPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if board.is_winner:
+        if board.is_winner(self.player_mark):
             return float("inf")
         if depth <= 0:
-            return self.score(board)
+            return self.score(board, self.player_mark)
         v = float("inf")
         for m in board.legal_moves:
             v = min(v, self.max_value(
@@ -303,10 +318,10 @@ class AlphaBetaPlayer(MinimaxPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if board.is_loser:
+        if board.is_loser(self.player_mark):
             return float("-inf")
         if depth <= 0:
-            return self.score(board)
+            return self.score(board, self.player_mark)
         v = float("-inf")
         for m in board.legal_moves:
             v = max(v, self.min_value(

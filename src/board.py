@@ -2,8 +2,8 @@ import numpy as np
 from copy import copy
 
 
-class gameerror(exception):
-    """subclass base exception for code clarity. """
+class GameError(Exception):
+    """Subclass base exception for code clarity. """
     pass
 
 
@@ -14,23 +14,23 @@ class Board(object):
     PLAYER_1 = 'O'
     PLAYER_2 = 'X'
 
-    def __init__(self, board, m, moves=None):
+    def __init__(self, board, m, last_move=None):
         self.m = m
         self.board = board
         self.moved = False
-        self.moves = [] if moves is None else moves
+        self.last_move = last_move
         self.width = len(board.split('\n')[0])
         self.height = len(board.split('\n')[:-1])
         self._board_state = self.get_board_state()
 
-        if self.moves == []:
-            self.player = self.player_1
-        elif moves[-1][0] == self.player_1:
-            self.player = self.player_2
-        elif moves[-1][0] == self.player_2:
-            self.player = self.player_1
+        if last_move is None:
+            self.player = self.PLAYER_1
+        elif last_move[0] == self.PLAYER_2:
+            self.player = self.PLAYER_1
+        elif last_move[0] == self.PLAYER_1:
+            self.player = self.PLAYER_2
         else:
-            raise gameerror('wrong move is found in moves!')
+            raise GameError('wrong move is found in moves!')
             
     def get_board_state(self):
         state = np.empty((self.height, self.width), dtype='str')
@@ -39,7 +39,7 @@ class Board(object):
                 if cell in [self.BLANK_SPACE, self.PLAYER_1, self.PLAYER_2]:
                     state[i, j] = cell
                 else:
-                    raise gameerror("illegal input board!")
+                    raise GameError("illegal input board!")
         
         return state
 
@@ -47,7 +47,7 @@ class Board(object):
         return 0 <= move[0] < self.height and 0 <= move[1] < self.width 
 
     def move_is_legal(self, move):
-        # TODO: Note the index starts from 0
+        # Note the index starts from 0
         return (self.on_the_board and self._board_state[
             move[0], [move[1]]] == self.BLANK_SPACE and not self.moved)
 
@@ -55,15 +55,23 @@ class Board(object):
     def legal_moves(self):
         return np.argwhere(self._board_state == self.BLANK_SPACE)
 
+    def get_opponent(self, player_mark):
+        if player_mark == self.PLAYER_1:
+            return self.PLAYER_2
+        elif player_mark == self.PLAYER_2:
+            return self.PLAYER_1
+        else:
+            return None
+        
     def copy(self):
-        return Board(copy(self.board), copy(self.m), copy(self.moves))
+        return Board(copy(self.board), copy(self.m), copy(self.last_move))
 
     def apply_move(self, move):
         if self.move_is_legal(move):
             self._board_state[move[0], move[1]] = self.player
             self.board = '\n'.join(
                 [''.join(row) for row in self._board_state]) + '\n'
-            self.moves.append((self.player, tuple(move)))
+            self.last_move = (self.player, tuple(move))
             self.moved = True
         else:
             raise GameError('Illegal move! move: ', move)
@@ -73,22 +81,19 @@ class Board(object):
         new_board.apply_move(move)
         return new_board
     
-    @property
-    def is_winner(self):
-        if self.moves:
-            assert self.moves[-1][0] == self.player
+    def is_winner(self, player_mark):
+        if self.last_move:
              
-            latest_move = self.moves[-1][1]
             directions = (((0, 1), (0, -1)), ((1, 0), (-1, 0)),
                           ((1, 1), (-1, -1)), ((1, -1), (-1, 1)))
             for bi_directions in directions:
                 count = 1
                 for d_i, d_j in bi_directions:
-                    i, j = latest_move
+                    i, j = self.last_move[1]
                     while True:
                         i, j = i + d_i, j + d_j
                         if (not self.on_the_board((i, j)) \
-                                or self._board_state[i, j] != self.player):
+                                or self._board_state[i, j] != player_mark):
                             break
                         count += 1
                         if count == self.m:
@@ -97,9 +102,8 @@ class Board(object):
         else: 
             return False
     
-    @property
-    def is_loser(self):
-        return not self.is_winner and len(self.legal_moves) == 0
+    def is_loser(self, player_mark):
+        return self.is_winner(self.get_opponent(player_mark))
     
     @property
     def board_for_print(self):
