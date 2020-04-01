@@ -36,7 +36,7 @@ class Board(object):
         return new_board
 
     def move_is_legal(self, move):
-        # TODO: Note the index starts from 0
+        # Note the index starts from 0
         i = move[0]
         j = move[1]
         return (0 <= i < self.height and 0 <= j < self.width and

@@ -14,23 +14,14 @@ class Board(object):
     PLAYER_1 = 'O'
     PLAYER_2 = 'X'
 
-    def __init__(self, board, m, last_move=None):
+    def __init__(self, board, m, last_moves=None):
         self.m = m
         self.board = board
         self.moved = False
-        self.last_move = last_move
+        self.last_moves = last_moves if last_moves else {}
         self.width = len(board.split('\n')[0])
         self.height = len(board.split('\n')[:-1])
         self._board_state = self.get_board_state()
-
-        if last_move is None:
-            self.player = self.PLAYER_1
-        elif last_move[0] == self.PLAYER_2:
-            self.player = self.PLAYER_1
-        elif last_move[0] == self.PLAYER_1:
-            self.player = self.PLAYER_2
-        else:
-            raise GameError('wrong move is found in moves!')
             
     def get_board_state(self):
         state = np.empty((self.height, self.width), dtype='str')
@@ -64,43 +55,46 @@ class Board(object):
             return None
         
     def copy(self):
-        return Board(copy(self.board), copy(self.m), copy(self.last_move))
+        return Board(copy(self.board), copy(self.m), copy(self.last_moves))
 
-    def apply_move(self, move):
+    def apply_move(self, move, player_mark):
         if self.move_is_legal(move):
-            self._board_state[move[0], move[1]] = self.player
+            self._board_state[move[0], move[1]] = player_mark
             self.board = '\n'.join(
                 [''.join(row) for row in self._board_state]) + '\n'
-            self.last_move = (self.player, tuple(move))
+            self.last_moves[player_mark] = tuple(move)
             self.moved = True
         else:
             raise GameError('Illegal move! move: ', move)
 
-    def get_moved_board(self, move):
+    def get_moved_board(self, move, player_mark):
         new_board = self.copy()
-        new_board.apply_move(move)
+        new_board.apply_move(move, player_mark)
         return new_board
     
     def is_winner(self, player_mark):
-        if self.last_move:
-             
-            directions = (((0, 1), (0, -1)), ((1, 0), (-1, 0)),
-                          ((1, 1), (-1, -1)), ((1, -1), (-1, 1)))
-            for bi_directions in directions:
-                count = 1
-                for d_i, d_j in bi_directions:
-                    i, j = self.last_move[1]
-                    while True:
-                        i, j = i + d_i, j + d_j
-                        if (not self.on_the_board((i, j)) \
-                                or self._board_state[i, j] != player_mark):
-                            break
-                        count += 1
-                        if count == self.m:
-                            return True
+        if self.last_moves == {}:
             return False
-        else: 
+        
+        if self.last_moves[player_mark] is None:
             return False
+        
+        directions = (((0, 1), (0, -1)), ((1, 0), (-1, 0)),
+                    ((1, 1), (-1, -1)), ((1, -1), (-1, 1)))
+        
+        for bi_directions in directions:
+            count = 1
+            for d_i, d_j in bi_directions:
+                i, j = self.last_moves[player_mark]
+                while True:
+                    i, j = i + d_i, j + d_j
+                    if (not self.on_the_board((i, j)) \
+                            or self._board_state[i, j] != player_mark):
+                        break
+                    count += 1
+                    if count == self.m:
+                        return True
+        return False
     
     def is_loser(self, player_mark):
         return self.is_winner(self.get_opponent(player_mark))

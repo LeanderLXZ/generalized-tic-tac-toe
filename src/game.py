@@ -35,9 +35,9 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
                 time_left = lambda : time_limit - (time_millis() - move_start)
                 move = players[player_idx][0].get_move(GameBoard, time_left)
                 print('return', move)
-                GameBoard = GameBoard.get_moved_board(move)
+                GameBoard = GameBoard.get_moved_board(move, player_mark)
                 print('Move: ', move)
-                print('Last Move: ', GameBoard.last_move)
+                print('Last Move: ', GameBoard.last_moves[player_mark])
                 print(GameBoard.board_for_print)
                 break
             except (GameError, SyntaxError) as e:
@@ -56,8 +56,8 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
 if __name__ == '__main__':
 
     P_1 = HumanPlayer()
-    P_2 = MinimaxPlayer(search_depth=3, score_fn=null_score, timeout=10.)
-    P_3 = AlphaBetaPlayer(search_depth=3, score_fn=null_score, timeout=10.) 
+    P_2 = MinimaxPlayer(score_fn=null_score, timeout=10.)
+    P_3 = AlphaBetaPlayer(score_fn=null_score, timeout=10.) 
     P_4 = RLPlayer('../data/Qtable3.txt')
 
     play_game(P_1, P_3, (3, 3), 3)

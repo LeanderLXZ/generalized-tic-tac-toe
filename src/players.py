@@ -10,16 +10,29 @@ class SearchTimeout(Exception):
 
 class Player(object):
     
-    TIMER_THRESHOLD = 10
+    TIMER_THRESHOLD = 100
+    BLANK_SPACE = '-'
+    PLAYER_1 = 'O'
+    PLAYER_2 = 'X'
     
     def __init__(self):
         self.player_mark = None
+        self.opponent_mark = None
 
     def assign_player_mark(self, player_mark):
         self.player_mark = player_mark
+        self.opponent_mark = self.get_opponent(player_mark)
         
     def get_move(self, board, time_left):
         raise NotImplementedError
+    
+    def get_opponent(self, player_mark):
+        if player_mark == self.PLAYER_1:
+            return self.PLAYER_2
+        elif player_mark == self.PLAYER_2:
+            return self.PLAYER_1
+        else:
+            return None
 
 
 class HumanPlayer(Player):
@@ -82,12 +95,6 @@ class MinimaxPlayer(Player):
 
     Parameters
     ----------
-    search_depth : int (optional)
-        A strictly positive integer (i.e., 1, 2, 3,...) for the number of
-        layers in the game tree to explore for fixed-depth search. (i.e., a
-        depth of one (1) would only explore the immediate sucessors of the
-        current state.)
-
     score_fn : callable (optional)
         A function to use for heuristic evaluation of game states.
 
@@ -97,8 +104,7 @@ class MinimaxPlayer(Player):
         timer expires.
     """
 
-    def __init__(self, search_depth=2, score_fn=null_score, timeout=10.):
-        self.search_depth = search_depth
+    def __init__(self, score_fn=null_score, timeout=10.):
         self.score = score_fn
         self.time_left = None
         self.timer_threshold = timeout
@@ -132,12 +138,14 @@ class MinimaxPlayer(Player):
         best_move = board.legal_moves[np.random.choice(len(board.legal_moves))]
 
         try:
-            # The try/except block will automatically catch the exception
-            # raised when the timer is about to expire.
-            return self.minimax(board, self.search_depth)
-
+            search_depth = 1
+            while search_depth <= len(board.legal_moves):
+                print('Now searching depth:', search_depth)
+                best_move = self.minimax(board, search_depth)
+                search_depth += 1
         except SearchTimeout:
             print('[W] Search timeout!')
+        finally:
             return best_move
     
     def minimax(self, board, depth):
@@ -165,8 +173,8 @@ class MinimaxPlayer(Player):
         best_score = float("-inf")
         best_move = (-1, -1)
         for m in board.legal_moves:
-            print('Now searching move {} ...'.format(m))
-            v = self.min_value(board.get_moved_board(m), depth - 1)
+            moved_board = board.get_moved_board(m, self.player_mark)
+            v = self.min_value(moved_board, depth - 1)
             if v > best_score:
                 best_score = v
                 best_move = m
@@ -186,7 +194,8 @@ class MinimaxPlayer(Player):
             return self.score(board, self.player_mark)
         v = float("inf")
         for m in board.legal_moves:
-            v = min(v, self.max_value(board.get_moved_board(m), depth - 1))
+            moved_board = board.get_moved_board(m, self.opponent_mark)
+            v = min(v, self.max_value(moved_board, depth - 1))
         return v
 
     def max_value(self, board, depth):
@@ -203,7 +212,8 @@ class MinimaxPlayer(Player):
             return self.score(board, self.player_mark)
         v = float("-inf")
         for m in board.legal_moves:
-            v = max(v, self.min_value(board.get_moved_board(m), depth - 1))
+            moved_board = board.get_moved_board(m, self.player_mark)
+            v = max(v, self.min_value(moved_board, depth - 1))
         return v
 
 
@@ -282,7 +292,9 @@ class AlphaBetaPlayer(MinimaxPlayer):
         best_score = float("-inf")
         best_move = (-1, -1)
         for m in board.legal_moves:
-            v = self.min_value(board.get_moved_board(m), alpha, beta, depth - 1)
+            moved_board = board.get_moved_board(m, self.player_mark) 
+            v = self.min_value(moved_board, alpha, beta, depth - 1)
+            print(v, m)
             if v > best_score:
                 best_score = v
                 best_move = m
@@ -303,8 +315,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return self.score(board, self.player_mark)
         v = float("inf")
         for m in board.legal_moves:
-            v = min(v, self.max_value(
-                board.get_moved_board(m), alpha, beta, depth - 1))
+            moved_board = board.get_moved_board(m, self.opponent_mark)
+            v = min(v, self.max_value(moved_board, alpha, beta, depth - 1))
             if v <= alpha:
                 return v
             beta = min(beta, v)
@@ -324,8 +336,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return self.score(board, self.player_mark)
         v = float("-inf")
         for m in board.legal_moves:
-            v = max(v, self.min_value(
-                board.get_moved_board(m), alpha, beta, depth - 1))
+            moved_board = board.get_moved_board(m, self.player_mark)
+            v = max(v, self.min_value(moved_board, alpha, beta, depth - 1))
             if v >= beta:
                 return v
             alpha = max(alpha, v)
