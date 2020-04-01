@@ -33,6 +33,7 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
             try:
                 move_start = time_millis()
                 time_left = lambda : time_limit - (time_millis() - move_start)
+                
                 move = players[player_idx][0].get_move(GameBoard, time_left)
                 print('return', move)
                 GameBoard = GameBoard.get_moved_board(move, player_mark)

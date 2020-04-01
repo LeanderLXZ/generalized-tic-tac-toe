@@ -18,7 +18,10 @@ class Board(object):
         self.m = m
         self.board = board
         self.moved = False
-        self.last_moves = last_moves if last_moves else {}
+        self.last_moves = last_moves if last_moves else {
+            self.PLAYER_1: None,
+            self.PLAYER_2: None
+        }
         self.width = len(board.split('\n')[0])
         self.height = len(board.split('\n')[:-1])
         self._board_state = self.get_board_state()

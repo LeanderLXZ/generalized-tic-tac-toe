@@ -109,6 +109,18 @@ class MinimaxPlayer(Player):
         self.time_left = None
         self.timer_threshold = timeout
         self.player_mark = None
+        
+    def _get_first_n_moves(self, board, last_moves):
+        pass
+        
+    def _get_limited_moves(self, board, last_moves):
+        
+        my_last_move = last_moves[self.player_mark]
+        opponent_last_move = last_moves[self.opponent_mark]
+        
+        moves = board.legal_moves
+    
+        return moves
 
     def get_move(self, board, time_left):
         """Search for the best move from the available legal moves and return a

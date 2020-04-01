@@ -7,10 +7,6 @@ from players import HumanPlayer, MinimaxPlayer, AlphaBetaPlayer, RLPlayer
 from scores import null_score
 
 
-TIME_LIMIT_MILLIS = 300000
-TIME_INTERVAL = 3
-
-
 class OnlineGame(object):
     
     BLANK_SPACE = '-'
@@ -25,7 +21,8 @@ class OnlineGame(object):
                  game_id,
                  api_url,
                  headers,
-                 time_limit=TIME_LIMIT_MILLIS):
+                 time_interval=3,
+                 time_limit=300000):
         self.board_size = board_size
         self.m = m
         self.player_mark = player_mark
@@ -34,6 +31,7 @@ class OnlineGame(object):
         self.game_id = game_id
         self.api_url = api_url
         self.headers = headers
+        self.time_interval = time_interval
         self.time_limit = time_limit
     
     def get_opponent(self, player_mark):
@@ -43,6 +41,11 @@ class OnlineGame(object):
             return self.PLAYER_1
         else:
             return None    
+
+    def _wait_for_a_while(self):
+        time_remaining = \
+            self.time_interval - time.time() % self.time_interval
+        time.sleep(time_remaining) 
         
     def make_move(self, move): 
         
@@ -54,47 +57,76 @@ class OnlineGame(object):
                 'gameId' : str(self.game_id)}
         
         while True:
-            time_remaining = TIME_INTERVAL - time.time() % TIME_INTERVAL
-            time.sleep(time_remaining)
+            #Wait
+            self._wait_for_a_while()
             
+            # Get json file from server 
             r = requests.post(self.api_url, data=data, headers=self.headers)
             j = json.loads(r.text)
+            
+            # If get a correct response
             if j['code'] == 'OK':
                 break
+            # Meet errors
             if 'Game is no longer open' in j['message']:
                 raise GameError('[E] Game is no longer open!')
             if 'Invalid game id' in j['message']:
                 raise GameError('[E] Invalid game id!')
             
-    def get_last_moves(self):
+    def get_opponent_moved_board(self):
         
-        print('Waiting for opponent...')
+        print('Waiting for your opponent...')
         
         while True:
-            time_remaining = TIME_INTERVAL - time.time() % TIME_INTERVAL
-            time.sleep(time_remaining)
+            # Wait
+            self._wait_for_a_while()
             
+            # Get json file from server
             api_url_new = self.api_url+'?type=moves&gameId={}&count={}'.format(
                 str(self.game_id), str(2))
             r = requests.get(api_url_new, headers=self.headers)
             j = json.loads(r.text)
+            
+            # If get a correct response
             if j['code'] == 'OK':
+                
+                # Check if the opponent win
+                board_str = self.get_board_str()
+                GameBoard = Board(self.get_board_str(), 
+                                  self.m, 
+                                  last_moves=None)
+                if GameBoard.is_winner(self.opponent_mark):
+                    raise GameError('The winner is Player \'{}\'!'.format(
+                        self.opponent_mark))
+                
+                # If the opponent has already done a move
                 if j['moves'][0]['symbol'] != self.player_mark:
                     break
+            
+            # Meet errors
             else:
                 if 'Game is no longer open' in j['message']:
                     raise GameError('[E] Game is no longer open!')
                 if 'Invalid game id' in j['message']:
                     raise GameError('[E] Invalid game id!')
         
+        # Modify the format of last_moves
+        #       None
+        #       {'O': (1, 2), 'X': None}
+        #       {'O': (1, 2), 'X': (2, 3)}
         if len(j['moves']) == 1:
-            return {self.player_mark: None,
-                    self.opponent_mark: eval(j['moves'][0]['move'])}
+            last_moves = {self.player_mark: None,
+                          self.opponent_mark: eval(j['moves'][0]['move'])}
         elif len(j['moves']) == 2:
-            return {self.player_mark: eval(j['moves'][1]['move']),
-                    self.opponent_mark: eval(j['moves'][0]['move'])}
+            last_moves = {self.player_mark: eval(j['moves'][1]['move']),
+                          self.opponent_mark: eval(j['moves'][0]['move'])}
         else:
             raise ValueError
+        
+        # Update last_moves of the board
+        GameBoard.last_moves = last_moves
+        
+        return GameBoard
         
     def get_board_str(self):
         r = requests.get(self.api_url+'?type=boardString&gameId={}'.format(
@@ -130,10 +162,7 @@ class OnlineGame(object):
         try:
             # Not the first player
             if self.player_mark != 'O':
-                last_moves = self.get_last_moves()
-                GameBoard = Board(self.get_board_str(), 
-                                  self.m, 
-                                  last_moves=last_moves)
+                GameBoard = self.get_opponent_moved_board()
             
             # If game is not over, do moves
             while not self.game_is_over(GameBoard):
@@ -142,35 +171,28 @@ class OnlineGame(object):
                 
                 # get a move
                 move = player.get_move(GameBoard, time_left)
+                MovedBoard = GameBoard.get_moved_board(move, self.player_mark)
                 print('-' * 70)
                 print('My Move ({}):'.format(self.player_mark), move)
-                print(GameBoard.get_moved_board(
-                    move, self.player_mark).board_for_print)
+                print(MovedBoard.board_for_print)
                 
                 # post to server
                 self.make_move(move)
                 
                 # Game is over after my move
-                if self.game_is_over(GameBoard):
+                if self.game_is_over(MovedBoard):
                     break
                 
-                # get opponent's move
-                #       None
-                #       {'O': (1, 2), 'X': None}
-                #       {'O': (1, 2), 'X': (2, 3)}
-                last_moves = self.get_last_moves()
+                # Get the move of opponents
+                GameBoard = self.get_opponent_moved_board()
                 
-                # generate new board
-                GameBoard = Board(self.get_board_str(), 
-                                  self.m, 
-                                  last_moves=last_moves)
                 print('-' * 70)
-                print('Opponent\'s Move ({}):'.format(
-                    self.opponent_mark), last_moves[self.opponent_mark])
+                print('Opponent\'s Move ({}):'.format(self.opponent_mark),
+                      GameBoard.last_moves[self.opponent_mark])
                 print(GameBoard.board_for_print)
                 
         except GameError as e:
-            print('Game over! Error:', e)
+            print('Game over!', e)
             if not self.game_is_over(GameBoard):
                 print(GameBoard.board_for_print)
 
@@ -181,7 +203,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'O'
     team_id_ = '1218'
-    game_id_ = '683'
+    game_id_ = '707'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -189,6 +211,8 @@ if __name__ == '__main__':
         'x-api-key' : 'e2cc2a708b2ebaeaea75',
         'userId' : '932'
     }
+    time_interval_ = 3
+    time_limit_ = 300000
     
     P_1 = HumanPlayer()
     P_2 = MinimaxPlayer(score_fn=null_score, timeout=10.)
@@ -198,9 +222,11 @@ if __name__ == '__main__':
     OnlineGame(
         board_size=board_size_,
         m=m_,
-        player_mark=player_mark_, 
+        player_mark=player_mark_,
         team_id=team_id_,
         game_id=game_id_,
         api_url=api_url_,
         headers=headers_,
+        time_interval=time_interval_,
+        time_limit=time_limit_
     ).play_game(P_3)
