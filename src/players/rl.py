@@ -9,6 +9,8 @@ class RLPlayer(Player):
         self.player_mark = None
 
     def get_move(self, board, time_left, n_step):
+        
+        self.n_step = n_step
 
         board_str = ''.join(board.board.split('\n'))
         action = self.choose_action(board_str, board)

@@ -135,8 +135,8 @@ class MinimaxPlayer(Player):
             return float("inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark))
-            return self.score_fn(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark, self.n_step))
+            return self.score_fn(board, self.player_mark, self.n_step)
         
         v = float("inf")
         candidate_moves = self.limited_moves_fn(
@@ -159,8 +159,8 @@ class MinimaxPlayer(Player):
             return float("-inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark))
-            return self.score_fn(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark, self.n_step))
+            return self.score_fn(board, self.player_mark, self.n_step)
         
         v = float("-inf")
         candidate_moves = self.limited_moves_fn(
@@ -289,8 +289,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return float("inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark))
-            return self.score_fn(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark, self.n_step))
+            return self.score_fn(board, self.player_mark, self.n_step)
         
         v = float("inf")
         
@@ -317,8 +317,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return float("-inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark))
-            return self.score_fn(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark, self.n_step))
+            return self.score_fn(board, self.player_mark, self.n_step)
         
         v = float("-inf")
         

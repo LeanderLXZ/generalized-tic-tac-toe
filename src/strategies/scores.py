@@ -1,4 +1,4 @@
-def null_score(board, player_mark):
+def null_score(board, player_mark, n_step):
     """This heuristic presumes no knowledge for non-terminal states, and
     returns the same uninformative value for all other states.
 
@@ -21,3 +21,7 @@ def null_score(board, player_mark):
         return float("inf")
 
     return 0.
+
+
+def advanced_score(board, player_mark, n_step):
+    pass

@@ -220,7 +220,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'X'
     team_id_ = '1220'
-    game_id_ = '741'
+    game_id_ = '742'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
