@@ -3,8 +3,12 @@ import time
 import json
 import requests
 from board import Board, GameError
-from players import HumanPlayer, MinimaxPlayer, AlphaBetaPlayer, RLPlayer
-from scores import null_score
+from players.players import HumanPlayer
+from players.minimax import MinimaxPlayer, AlphaBetaPlayer
+from players.rl import RLPlayer
+from strategies.scores import *
+from strategies.get_initial_moves import *
+from strategies.get_limited_moves import *
 
 
 class OnlineGame(object):
@@ -137,12 +141,15 @@ class OnlineGame(object):
     def game_is_over(self, board):
         # win & lose
         if board.is_winner('O'):
+            print('=' * 70)
             print('The winner is Player \'O\'!') 
             return True
         elif board.is_winner('X'):
+            print('=' * 70)
             print('The winner is Player \'X\'!') 
             return True
         elif len(board.legal_moves) == 0:
+            print('=' * 70)
             print('Game over! No winner!') 
             return True
         else:
@@ -159,10 +166,14 @@ class OnlineGame(object):
         GameBoard = Board(init_board, self.m)
         print(GameBoard.board_for_print)
         
+        # The step of gaming
+        n_step = 0
+        
         try:
             # Not the first player
             if self.player_mark != 'O':
                 GameBoard = self.get_opponent_moved_board()
+                n_step += 1
             
             # If game is not over, do moves
             while not self.game_is_over(GameBoard):
@@ -170,14 +181,16 @@ class OnlineGame(object):
                 time_left = lambda : time_limit - (time_millis() - move_start)
                 
                 # get a move
-                move = player.get_move(GameBoard, time_left)
+                move = player.get_move(GameBoard, time_left, n_step)
                 MovedBoard = GameBoard.get_moved_board(move, self.player_mark)
                 print('-' * 70)
+                print('Step: ', n_step)
                 print('My Move ({}):'.format(self.player_mark), move)
                 print(MovedBoard.board_for_print)
                 
                 # post to server
                 self.make_move(move)
+                n_step += 1
                 
                 # Game is over after my move
                 if self.game_is_over(MovedBoard):
@@ -185,13 +198,16 @@ class OnlineGame(object):
                 
                 # Get the move of opponents
                 GameBoard = self.get_opponent_moved_board()
+                n_step += 1
                 
                 print('-' * 70)
+                print('Step: ', n_step)
                 print('Opponent\'s Move ({}):'.format(self.opponent_mark),
                       GameBoard.last_moves[self.opponent_mark])
                 print(GameBoard.board_for_print)
                 
         except GameError as e:
+            print('=' * 70)
             print('Game over!', e)
             if not self.game_is_over(GameBoard):
                 print(GameBoard.board_for_print)
@@ -215,9 +231,32 @@ if __name__ == '__main__':
     time_limit_ = 300000
     
     P_1 = HumanPlayer()
-    P_2 = MinimaxPlayer(score_fn=null_score, timeout=10.)
-    P_3 = AlphaBetaPlayer(score_fn=null_score, timeout=1.) 
+    P_2 = MinimaxPlayer(
+        score_fn=null_score,
+        initial_moves_fn=im_limited_center_random,
+        limited_moves_fn=lm_consider_both,
+        timeout=10.
+    )
+    P_3 = AlphaBetaPlayer(
+        score_fn=null_score,
+        initial_moves_fn=im_limited_center_random,
+        limited_moves_fn=lm_consider_both,
+        timeout=10.
+    )
     P_4 = RLPlayer('../data/Qtable3.txt')
+    
+    P_5 = MinimaxPlayer(
+        score_fn=null_score,
+        initial_moves_fn=im_limited_center_random,
+        limited_moves_fn=lm_consider_both,
+        timeout=10.
+    )
+    P_6 = AlphaBetaPlayer(
+        score_fn=null_score,
+        initial_moves_fn=im_limited_center_random,
+        limited_moves_fn=lm_consider_both,
+        timeout=10.
+    )
 
     OnlineGame(
         board_size=board_size_,

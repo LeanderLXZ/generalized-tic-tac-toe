@@ -1,93 +1,8 @@
 import numpy as np
-from scores import null_score
-from board import GameError
-
-
-class SearchTimeout(Exception):
-    """Subclass base exception for code clarity. """
-    pass
-
-
-class Player(object):
-    
-    TIMER_THRESHOLD = 100
-    BLANK_SPACE = '-'
-    PLAYER_1 = 'O'
-    PLAYER_2 = 'X'
-    
-    def __init__(self):
-        self.player_mark = None
-        self.opponent_mark = None
-
-    def assign_player_mark(self, player_mark):
-        self.player_mark = player_mark
-        self.opponent_mark = self.get_opponent(player_mark)
-        
-    def get_move(self, board, time_left):
-        raise NotImplementedError
-    
-    def get_opponent(self, player_mark):
-        if player_mark == self.PLAYER_1:
-            return self.PLAYER_2
-        elif player_mark == self.PLAYER_2:
-            return self.PLAYER_1
-        else:
-            return None
-
-
-class HumanPlayer(Player):
-
-    def get_move(self, board, time_left):
-        input_move = input('Input a move (format: tuple): ')
-        try:
-           input_move = tuple([int(s) for s in input_move.split(' ')]) 
-        except:
-            try:
-                input_move = eval(input_move)
-                if type(input_move) is not tuple:
-                    raise GameError('Illegal input! Please input a tuple!')
-            except:
-                raise GameError('Illegal input! Please input a tuple!')
-        return input_move
-
-
-class RLPlayer(Player):
-    
-    def __init__(self, filename):
-        self.q_table = self.get_q_table(filename)
-        self.player_mark = None
-
-    def get_move(self, board, time_left):
-
-        board_str = ''.join(board.board.split('\n'))
-        action = self.choose_action(board_str, board)
-        if action:
-            n = board.width
-            x = int(action // n)
-            y = int(action % n)
-            return (x, y)
-        else:
-            return board.legal_moves[np.random.choice(len(board.legal_moves))]
-
-    def choose_action(self, state, board):
-        # action selection
-        # exploitation, choose best action
-        if state in self.q_table:
-            value = max(self.q_table[state].values())
-            action = self.get_action(state, value)
-            return action
-        else:
-            return None
-    
-    def get_q_table(self, filename):
-        with open(filename, 'r') as f:
-            return eval(f.read())
-
-    def get_action(self, state, value):
-        
-        for k,v in self.q_table[state].items():
-            if v == value:
-                return k
+from strategies.scores import null_score
+from strategies.get_initial_moves import null_im
+from strategies.get_limited_moves import null_lm
+from players.players import Player, SearchTimeout
 
 
 class MinimaxPlayer(Player):
@@ -104,25 +19,19 @@ class MinimaxPlayer(Player):
         timer expires.
     """
 
-    def __init__(self, score_fn=null_score, timeout=10.):
-        self.score = score_fn
+    def __init__(self, 
+                 score_fn=null_score,
+                 initial_moves_fn = null_im,
+                 limited_moves_fn = null_lm,
+                 timeout=10.):
+        self.score_fn = score_fn
+        self.initial_moves_fn = initial_moves_fn
+        self.limited_moves_fn = limited_moves_fn
         self.time_left = None
         self.timer_threshold = timeout
         self.player_mark = None
-        
-    def _get_first_n_moves(self, board, last_moves):
-        pass
-        
-    def _get_limited_moves(self, board, last_moves):
-        
-        my_last_move = last_moves[self.player_mark]
-        opponent_last_move = last_moves[self.opponent_mark]
-        
-        moves = board.legal_moves
-    
-        return moves
 
-    def get_move(self, board, time_left):
+    def get_move(self, board, time_left, n_step):
         """Search for the best move from the available legal moves and return a
         result before the time limit expires.
 
@@ -136,6 +45,9 @@ class MinimaxPlayer(Player):
             A function that returns the number of milliseconds left in the
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
+            
+        n_step : int
+            the index number of step
 
         Returns
         -------
@@ -143,6 +55,10 @@ class MinimaxPlayer(Player):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
+        initial_move = self.initial_moves_fn(board, n_step)
+        if initial_move:
+            return initial_move
+        
         self.time_left = time_left
 
         # Initialize the best move so that this function returns something
@@ -157,8 +73,8 @@ class MinimaxPlayer(Player):
                 search_depth += 1
         except SearchTimeout:
             print('[W] Search timeout!')
-        finally:
-            return best_move
+        
+        return best_move
     
     def minimax(self, board, depth):
         """Depth-limited minimax search algorithm.
@@ -184,12 +100,20 @@ class MinimaxPlayer(Player):
 
         best_score = float("-inf")
         best_move = (-1, -1)
-        for m in board.legal_moves:
+        
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        for m in candidate_moves:
+            # print('me first do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, depth - 1)
+            # print(v, m)
             if v > best_score:
                 best_score = v
                 best_move = m
+                
+        if best_move == (-1, -1):
+            print('Randomly get a best_move')
+            best_move = candidate_moves[np.random.choice(len(candidate_moves))]
         return best_move
 
     def min_value(self, board, depth):
@@ -202,10 +126,15 @@ class MinimaxPlayer(Player):
 
         if board.is_winner(self.player_mark):
             return float("inf")
+        
         if depth <= 0:
-            return self.score(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark))
+            return self.score_fn(board, self.player_mark)
+        
         v = float("inf")
-        for m in board.legal_moves:
+        candidate_moves = self.limited_moves_fn(board, self.opponent_mark)
+        for m in candidate_moves:
+            # print('op do', m)
             moved_board = board.get_moved_board(m, self.opponent_mark)
             v = min(v, self.max_value(moved_board, depth - 1))
         return v
@@ -220,10 +149,15 @@ class MinimaxPlayer(Player):
 
         if board.is_loser(self.player_mark):
             return float("-inf")
+        
         if depth <= 0:
-            return self.score(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark))
+            return self.score_fn(board, self.player_mark)
+        
         v = float("-inf")
-        for m in board.legal_moves:
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        for m in candidate_moves:
+            # print('me do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
             v = max(v, self.min_value(moved_board, depth - 1))
         return v
@@ -235,7 +169,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
     make sure it returns a good move before the search time limit expires.
     """
 
-    def get_move(self, board, time_left):
+    def get_move(self, board, time_left, n_step):
         """Search for the best move from the available legal moves and return a
         result before the time limit expires.
 
@@ -249,6 +183,9 @@ class AlphaBetaPlayer(MinimaxPlayer):
             A function that returns the number of milliseconds left in the
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
+            
+        n_step : int
+            the index number of step
 
         Returns
         -------
@@ -256,18 +193,25 @@ class AlphaBetaPlayer(MinimaxPlayer):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
+        initial_move = self.initial_moves_fn(board, n_step)
+        if initial_move:
+            return initial_move
+        
         self.time_left = time_left
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
         best_move = board.legal_moves[np.random.choice(len(board.legal_moves))]
-
+    
         try:
             search_depth = 1
             while search_depth <= len(board.legal_moves):
                 print('Now searching depth:', search_depth)
                 best_move = self.alphabeta(board, search_depth)
                 search_depth += 1
+        except KeyboardInterrupt:
+            print('-======')
+            return
         except SearchTimeout:
             print('[W] Search timeout!')
         finally:
@@ -303,14 +247,21 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
         best_score = float("-inf")
         best_move = (-1, -1)
-        for m in board.legal_moves:
-            moved_board = board.get_moved_board(m, self.player_mark) 
+        
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        for m in candidate_moves:
+            # print('me first do', m)
+            moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, alpha, beta, depth - 1)
             print(v, m)
             if v > best_score:
                 best_score = v
                 best_move = m
             alpha = max(alpha, v)
+            
+        if best_move == (-1, -1):
+            print('Randomly get a best_move')
+            best_move = candidate_moves[np.random.choice(len(candidate_moves))]
         return best_move
 
     def min_value(self, board, alpha, beta, depth):
@@ -323,10 +274,16 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
         if board.is_winner(self.player_mark):
             return float("inf")
+        
         if depth <= 0:
-            return self.score(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark))
+            return self.score_fn(board, self.player_mark)
+        
         v = float("inf")
-        for m in board.legal_moves:
+        
+        candidate_moves = self.limited_moves_fn(board, self.opponent_mark)
+        for m in candidate_moves:
+            # print('op do', m)
             moved_board = board.get_moved_board(m, self.opponent_mark)
             v = min(v, self.max_value(moved_board, alpha, beta, depth - 1))
             if v <= alpha:
@@ -344,10 +301,16 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
         if board.is_loser(self.player_mark):
             return float("-inf")
+        
         if depth <= 0:
-            return self.score(board, self.player_mark)
+            # print('s', self.score_fn(board, self.player_mark))
+            return self.score_fn(board, self.player_mark)
+        
         v = float("-inf")
-        for m in board.legal_moves:
+        
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        for m in candidate_moves:
+            # print('me do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
             v = max(v, self.min_value(moved_board, alpha, beta, depth - 1))
             if v >= beta:

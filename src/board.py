@@ -36,6 +36,9 @@ class Board(object):
                     raise GameError("illegal input board!")
         
         return state
+    
+    def get_mark(self, move):
+        return self._board_state[move[0], move[1]]
 
     def on_the_board(self, move):
         return 0 <= move[0] < self.height and 0 <= move[1] < self.width 
@@ -43,7 +46,7 @@ class Board(object):
     def move_is_legal(self, move):
         # Note the index starts from 0
         return (self.on_the_board and self._board_state[
-            move[0], [move[1]]] == self.BLANK_SPACE and not self.moved)
+            move[0], move[1]] == self.BLANK_SPACE and not self.moved)
 
     @property
     def legal_moves(self):
