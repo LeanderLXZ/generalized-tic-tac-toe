@@ -11,7 +11,6 @@ class SearchTimeout(Exception):
 
 class Player(object):
     
-    TIMER_THRESHOLD = 100
     BLANK_SPACE = '-'
     PLAYER_1 = 'O'
     PLAYER_2 = 'X'
@@ -19,6 +18,7 @@ class Player(object):
     def __init__(self):
         self.player_mark = None
         self.opponent_mark = None
+        self.n_step = 0
         self.initial_moves_fn = null_im
         self.limited_moves_fn = null_lm
         
@@ -41,6 +41,9 @@ class Player(object):
 class HumanPlayer(Player):
 
     def get_move(self, board, time_left, n_step):
+        
+        self.n_step = n_step
+        
         input_move = input('Input a move (format: tuple): ')
         try:
            input_move = tuple([int(s) for s in input_move.split(' ')]) 

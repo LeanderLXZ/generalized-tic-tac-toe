@@ -178,7 +178,8 @@ class OnlineGame(object):
             # If game is not over, do moves
             while not self.game_is_over(GameBoard):
                 move_start = time_millis()
-                time_left = lambda : time_limit - (time_millis() - move_start)
+                time_left = \
+                    lambda : self.time_limit - (time_millis() - move_start)
                 
                 # get a move
                 move = player.get_move(GameBoard, time_left, n_step)
@@ -219,7 +220,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'X'
     team_id_ = '1220'
-    game_id_ = '707'
+    game_id_ = '741'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -227,21 +228,25 @@ if __name__ == '__main__':
         'x-api-key' : 'b63d17656c29409d6005',
         'userId' : '936'
     }
-    time_interval_ = 3
-    time_limit_ = 300000
+    # second
+    time_interval_ = 3 
+    # milli second
+    time_limit_ = 3000
+    # milli second
+    timer_threshold_ = 100
     
     P_1 = HumanPlayer()
     P_2 = MinimaxPlayer(
         score_fn=null_score,
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
-        timeout=10.
+        timeout=timer_threshold_
     )
     P_3 = AlphaBetaPlayer(
         score_fn=null_score,
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
-        timeout=10.
+        timeout=timer_threshold_
     )
     P_4 = RLPlayer('../data/Qtable3.txt')
     
@@ -249,13 +254,13 @@ if __name__ == '__main__':
         score_fn=null_score,
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
-        timeout=10.
+        timeout=timer_threshold_
     )
     P_6 = AlphaBetaPlayer(
         score_fn=null_score,
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
-        timeout=10.
+        timeout=timer_threshold_
     )
 
     OnlineGame(

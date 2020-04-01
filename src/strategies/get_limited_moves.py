@@ -59,11 +59,33 @@ def surround_star_block(board, move, player_mark,
     else:
         return []
     
-    
-def lm_consider_both(board, player_mark):
+
+def lm_consider_self(board, player_mark, n_step):
     
     radius_sur = 2
-    radius_star = 5
+    radius_star = 2
+    
+    last_moves = board.last_moves
+    self_last_move = last_moves[player_mark]
+    opp_mark = get_opponent(player_mark) 
+    
+    moves = surround_star_block(
+        board, self_last_move, player_mark, opp_mark, radius_sur, radius_star)
+
+    return moves
+
+    
+def lm_consider_both(board, player_mark, n_step):
+    
+    if n_step < 6:
+        radius_sur = 1
+        radius_star = 0
+    elif n_step < 16:
+        radius_sur = 1
+        radius_star = 5
+    else:
+        radius_sur = 2
+        radius_star = 6
     
     last_moves = board.last_moves
     self_last_move = last_moves[player_mark]
@@ -79,19 +101,4 @@ def lm_consider_both(board, player_mark):
         if m not in moves:
             moves.append(m)
     
-    return moves
-
-
-def lm_consider_self(board, player_mark):
-    
-    radius_sur = 2
-    radius_star = 5
-    
-    last_moves = board.last_moves
-    self_last_move = last_moves[player_mark]
-    opp_mark = get_opponent(player_mark) 
-    
-    moves = surround_star_block(
-        board, self_last_move, player_mark, opp_mark, radius_sur, radius_star)
-
     return moves

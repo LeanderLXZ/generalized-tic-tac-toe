@@ -55,6 +55,8 @@ class MinimaxPlayer(Player):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
+        self.n_step = n_step
+        
         initial_move = self.initial_moves_fn(board, n_step)
         if initial_move:
             return initial_move
@@ -63,7 +65,7 @@ class MinimaxPlayer(Player):
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = board.legal_moves[np.random.choice(len(board.legal_moves))]
+        best_move = (-1, -1)
 
         try:
             search_depth = 1
@@ -73,7 +75,11 @@ class MinimaxPlayer(Player):
                 search_depth += 1
         except SearchTimeout:
             print('[W] Search timeout!')
-        
+            
+        if best_move == (-1, -1):
+            print('Randomly get a best_move')
+            best_move = \
+                board.legal_moves[np.random.choice(len(board.legal_moves))]
         return best_move
     
     def minimax(self, board, depth):
@@ -95,18 +101,19 @@ class MinimaxPlayer(Player):
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
+        if self.time_left() < self.timer_threshold:
             raise SearchTimeout()
 
         best_score = float("-inf")
         best_move = (-1, -1)
         
-        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        candidate_moves = self.limited_moves_fn(
+            board, self.player_mark, self.n_step)
         for m in candidate_moves:
             # print('me first do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, depth - 1)
-            # print(v, m)
+            print(v, m)
             if v > best_score:
                 best_score = v
                 best_move = m
@@ -121,7 +128,7 @@ class MinimaxPlayer(Player):
         otherwise return the minimum value over all legal child
         nodes.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
+        if self.time_left() < self.timer_threshold:
             raise SearchTimeout()
 
         if board.is_winner(self.player_mark):
@@ -132,7 +139,8 @@ class MinimaxPlayer(Player):
             return self.score_fn(board, self.player_mark)
         
         v = float("inf")
-        candidate_moves = self.limited_moves_fn(board, self.opponent_mark)
+        candidate_moves = self.limited_moves_fn(
+            board, self.opponent_mark, self.n_step)
         for m in candidate_moves:
             # print('op do', m)
             moved_board = board.get_moved_board(m, self.opponent_mark)
@@ -144,7 +152,7 @@ class MinimaxPlayer(Player):
         otherwise return the maximum value over all legal child
         nodes.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
+        if self.time_left() < self.timer_threshold:
             raise SearchTimeout()
 
         if board.is_loser(self.player_mark):
@@ -155,7 +163,8 @@ class MinimaxPlayer(Player):
             return self.score_fn(board, self.player_mark)
         
         v = float("-inf")
-        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        candidate_moves = self.limited_moves_fn(
+            board, self.player_mark, self.n_step)
         for m in candidate_moves:
             # print('me do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
@@ -193,6 +202,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
+        self.n_step = n_step
+        
         initial_move = self.initial_moves_fn(board, n_step)
         if initial_move:
             return initial_move
@@ -201,7 +212,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = board.legal_moves[np.random.choice(len(board.legal_moves))]
+        best_move = (-1, -1)
     
         try:
             search_depth = 1
@@ -209,13 +220,14 @@ class AlphaBetaPlayer(MinimaxPlayer):
                 print('Now searching depth:', search_depth)
                 best_move = self.alphabeta(board, search_depth)
                 search_depth += 1
-        except KeyboardInterrupt:
-            print('-======')
-            return
         except SearchTimeout:
             print('[W] Search timeout!')
-        finally:
-            return best_move
+            
+        if best_move == (-1, -1):
+            print('Randomly get a best_move')
+            best_move = \
+                board.legal_moves[np.random.choice(len(board.legal_moves))]
+        return best_move
 
     def alphabeta(self, board, depth, alpha=float("-inf"), beta=float("inf")):
         """Depth-limited minimax search with alpha-beta pruning.
@@ -242,13 +254,14 @@ class AlphaBetaPlayer(MinimaxPlayer):
             The board coordinates of the best move found in the current search;
             (-1, -1) if there are no legal moves
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
+        if self.time_left() < self.timer_threshold:
             raise SearchTimeout()
 
         best_score = float("-inf")
         best_move = (-1, -1)
         
-        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        candidate_moves = self.limited_moves_fn(
+            board, self.player_mark, self.n_step)
         for m in candidate_moves:
             # print('me first do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
@@ -269,7 +282,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
         otherwise return the minimum value over all legal child
         nodes.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
+        if self.time_left() < self.timer_threshold:
             raise SearchTimeout()
 
         if board.is_winner(self.player_mark):
@@ -281,7 +294,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
         
         v = float("inf")
         
-        candidate_moves = self.limited_moves_fn(board, self.opponent_mark)
+        candidate_moves = self.limited_moves_fn(
+            board, self.opponent_mark, self.n_step)
         for m in candidate_moves:
             # print('op do', m)
             moved_board = board.get_moved_board(m, self.opponent_mark)
@@ -296,7 +310,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
         otherwise return the maximum value over all legal child
         nodes.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
+        if self.time_left() < self.timer_threshold:
             raise SearchTimeout()
 
         if board.is_loser(self.player_mark):
@@ -308,7 +322,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
         
         v = float("-inf")
         
-        candidate_moves = self.limited_moves_fn(board, self.player_mark)
+        candidate_moves = self.limited_moves_fn(
+            board, self.player_mark, self.n_step)
         for m in candidate_moves:
             # print('me do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
