@@ -3,7 +3,7 @@ import numpy as numpy
 from board import Board, GameError
 from players.players import HumanPlayer
 from players.minimax import MinimaxPlayer, AlphaBetaPlayer
-from players.rl import RLPlayer
+from players.rl import *
 from strategies.scores import *
 from strategies.get_initial_moves import *
 from strategies.get_limited_moves import *
@@ -95,7 +95,7 @@ if __name__ == '__main__':
         limited_moves_fn=lm_consider_both,
         timeout=10.
     )
-    P_4 = RLPlayer('../data/Qtable3.txt')
+    P_4 = QLearningTablePlayer('../data/Qtable3.txt')
     
     P_5 = MinimaxPlayer(
         score_fn=null_score,
@@ -109,5 +109,9 @@ if __name__ == '__main__':
         limited_moves_fn=lm_consider_both,
         timeout=10.
     )
+    P_7 = DQNPlayer(12, 6, load = False)
+    # store data
+    #P_7.dqn.save_net()
+    #P_7.dqn.store_memory()
 
-    play_game(P_2, P_5, (5, 5), 3)
+    play_game(P_2, P_4, (12, 12), 6)
