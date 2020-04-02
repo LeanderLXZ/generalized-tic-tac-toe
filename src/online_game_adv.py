@@ -2,10 +2,13 @@ import timeit
 import time
 import json
 import requests
+
 from board import Board, GameError
+
 from players.players import HumanPlayer
 from players.minimax import MinimaxPlayer, AlphaBetaPlayer
 from players.rl import RLPlayer
+
 from strategies.scores import *
 from strategies.get_initial_moves import *
 from strategies.get_limited_moves import *
@@ -228,36 +231,35 @@ if __name__ == '__main__':
         'x-api-key' : 'b63d17656c29409d6005',
         'userId' : '936'
     }
-    # second
+    # time interval for requesting - second
     time_interval_ = 3 
-    # milli second
+    # time limit for each step - milli second
     time_limit_ = 3000
-    # milli second
+    # timeout threshold for searching - milli second
     timer_threshold_ = 100
     
     P_1 = HumanPlayer()
     P_2 = MinimaxPlayer(
-        score_fn=null_score,
+        score_fn=NullScore(),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
         timeout=timer_threshold_
     )
     P_3 = AlphaBetaPlayer(
-        score_fn=null_score,
+        score_fn=NullScore(),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
         timeout=timer_threshold_
     )
-    P_4 = RLPlayer('../data/Qtable3.txt')
     
     P_5 = MinimaxPlayer(
-        score_fn=null_score,
+        score_fn=NullScore(),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
         timeout=timer_threshold_
     )
     P_6 = AlphaBetaPlayer(
-        score_fn=null_score,
+        score_fn=NullScore(),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
         timeout=timer_threshold_

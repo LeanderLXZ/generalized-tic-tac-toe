@@ -1,17 +1,10 @@
 import numpy as np
+from utils import *
 
 
-def null_lm(board, player_mark):
-    return board.legal_moves
+def null_lm(board, player_mark, n_step):
+    return [tuple(m) for m in board.legal_moves]
 
-
-def get_opponent(player_mark):
-    if player_mark == 'X':
-        return 'O'
-    elif player_mark == 'O':
-        return 'X'
-    else:
-        return None
 
 def surround_moves(board, move, radius):
     legal_moves = board.legal_moves.tolist()
@@ -62,6 +55,7 @@ def surround_star_block(board, move, player_mark,
 
 def lm_consider_self(board, player_mark, n_step):
     
+    # Radius setting 
     radius_sur = 2
     radius_star = 2
     
@@ -73,10 +67,11 @@ def lm_consider_self(board, player_mark, n_step):
         board, self_last_move, player_mark, opp_mark, radius_sur, radius_star)
 
     return moves
-
     
 def lm_consider_both(board, player_mark, n_step):
     
+    # Radius setting
+    center_radius = 1
     if n_step < 6:
         radius_sur = 1
         radius_star = 0
@@ -97,8 +92,19 @@ def lm_consider_both(board, player_mark, n_step):
     moves_opp = surround_star_block(
         board, opp_last_move, opp_mark, player_mark, radius_sur, radius_star)
 
+    # Combine two move areas together
     for m in moves_opp:
         if m not in moves:
             moves.append(m)
+    
+    # For the beginning of the game, allow agent to do moves in center area
+    if n_step < 6:
+        board_width = board.width
+        board_height = board.height
+        center_move = (board_height // 2, board_width // 2)
+        moves_center = surround_moves(board, center_move, center_radius)
+        for m in moves_center:
+            if m not in moves:
+                moves.append(m)
     
     return moves

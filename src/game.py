@@ -1,9 +1,12 @@
 import timeit
 import numpy as numpy
+
 from board import Board, GameError
+
 from players.players import HumanPlayer
 from players.minimax import MinimaxPlayer, AlphaBetaPlayer
 from players.rl import RLPlayer
+
 from strategies.scores import *
 from strategies.get_initial_moves import *
 from strategies.get_limited_moves import *
@@ -81,33 +84,43 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
 
 
 if __name__ == '__main__':
-
+    
+    board_size_ = (12, 12)
+    m_ = 6
+    # time limit for each step - milli second
+    time_limit_ = 10000
+    # timeout threshold for searching - milli second
+    timer_threshold_ = 10
+    
+    # Human Player
     P_1 = HumanPlayer()
+    
+    # Artificial Idiot
     P_2 = MinimaxPlayer(
-        score_fn=null_score,
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
-        timeout=10.
+        score_fn=NullScore(),
+        initial_moves_fn=null_im,
+        limited_moves_fn=null_lm,
+        timeout=timer_threshold_
     )
     P_3 = AlphaBetaPlayer(
-        score_fn=null_score,
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
-        timeout=10.
+        score_fn=NullScore(),
+        initial_moves_fn=null_im,
+        limited_moves_fn=null_lm,
+        timeout=timer_threshold_
     )
-    P_4 = RLPlayer('../data/Qtable3.txt')
-    
+   
+    # Artificial Intelligence
     P_5 = MinimaxPlayer(
-        score_fn=null_score,
+        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
-        timeout=10.
+        timeout=timer_threshold_
     )
     P_6 = AlphaBetaPlayer(
-        score_fn=null_score,
+        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
-        timeout=10.
+        timeout=timer_threshold_
     )
 
-    play_game(P_2, P_5, (5, 5), 3)
+    play_game(P_1, P_5, board_size_, m_, time_limit_)

@@ -3,7 +3,8 @@ import numpy as np
 
 def null_im(board, n_step):
     if n_step == 0:
-        return board.legal_moves[np.random.choice(len(board.legal_moves))]
+        return tuple(board.legal_moves[
+            np.random.choice(len(board.legal_moves))])
     else:
         return None
 

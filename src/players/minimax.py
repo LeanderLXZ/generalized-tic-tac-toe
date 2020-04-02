@@ -1,7 +1,11 @@
 import numpy as np
-from strategies.scores import null_score
+
+from utils import print_time
+
+from strategies.scores import NullScore
 from strategies.get_initial_moves import null_im
 from strategies.get_limited_moves import null_lm
+
 from players.players import Player, SearchTimeout
 
 
@@ -20,7 +24,7 @@ class MinimaxPlayer(Player):
     """
 
     def __init__(self, 
-                 score_fn=null_score,
+                 score_fn=NullScore(),
                  initial_moves_fn = null_im,
                  limited_moves_fn = null_lm,
                  timeout=10.):
@@ -82,6 +86,7 @@ class MinimaxPlayer(Player):
                 board.legal_moves[np.random.choice(len(board.legal_moves))]
         return best_move
     
+    @print_time
     def minimax(self, board, depth):
         """Depth-limited minimax search algorithm.
 
@@ -113,11 +118,10 @@ class MinimaxPlayer(Player):
             # print('me first do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, depth - 1)
-            print(v, m)
             if v > best_score:
                 best_score = v
                 best_move = m
-                
+        
         if best_move == (-1, -1):
             print('Randomly get a best_move')
             best_move = candidate_moves[np.random.choice(len(candidate_moves))]
@@ -135,8 +139,9 @@ class MinimaxPlayer(Player):
             return float("inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark, self.n_step))
-            return self.score_fn(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(
+            #     board, self.player_mark, self.n_step))
+            return self.score_fn.get_score(board, self.player_mark, self.n_step)
         
         v = float("inf")
         candidate_moves = self.limited_moves_fn(
@@ -159,8 +164,9 @@ class MinimaxPlayer(Player):
             return float("-inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark, self.n_step))
-            return self.score_fn(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(
+            #     board, self.player_mark, self.n_step))
+            return self.score_fn.get_score(board, self.player_mark, self.n_step)
         
         v = float("-inf")
         candidate_moves = self.limited_moves_fn(
@@ -229,6 +235,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
                 board.legal_moves[np.random.choice(len(board.legal_moves))]
         return best_move
 
+    @print_time
     def alphabeta(self, board, depth, alpha=float("-inf"), beta=float("inf")):
         """Depth-limited minimax search with alpha-beta pruning.
         
@@ -289,8 +296,9 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return float("inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark, self.n_step))
-            return self.score_fn(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(
+            #     board, self.player_mark, self.n_step))
+            return self.score_fn.get_score(board, self.player_mark, self.n_step)
         
         v = float("inf")
         
@@ -317,8 +325,9 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return float("-inf")
         
         if depth <= 0:
-            # print('s', self.score_fn(board, self.player_mark, self.n_step))
-            return self.score_fn(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(
+            #     board, self.player_mark, self.n_step))
+            return self.score_fn.get_score(board, self.player_mark, self.n_step)
         
         v = float("-inf")
         

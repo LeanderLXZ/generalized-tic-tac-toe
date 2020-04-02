@@ -1,5 +1,6 @@
 import numpy as np
 from copy import copy
+from utils import *
 
 
 class GameError(Exception):
@@ -51,14 +52,6 @@ class Board(object):
     @property
     def legal_moves(self):
         return np.argwhere(self._board_state == self.BLANK_SPACE)
-
-    def get_opponent(self, player_mark):
-        if player_mark == self.PLAYER_1:
-            return self.PLAYER_2
-        elif player_mark == self.PLAYER_2:
-            return self.PLAYER_1
-        else:
-            return None
         
     def copy(self):
         return Board(copy(self.board), copy(self.m), copy(self.last_moves))
@@ -103,7 +96,7 @@ class Board(object):
         return False
     
     def is_loser(self, player_mark):
-        return self.is_winner(self.get_opponent(player_mark))
+        return self.is_winner(get_opponent(player_mark))
     
     @property
     def board_for_print(self):
