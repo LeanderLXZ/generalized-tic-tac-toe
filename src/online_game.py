@@ -6,8 +6,8 @@ import requests
 from board import Board, GameError
 
 from players.players import HumanPlayer
-from players.minimax import MinimaxPlayer, AlphaBetaPlayer
-from players.rl import RLPlayer
+from players.minimax import *
+from players.rl import *
 
 from strategies.scores import *
 from strategies.get_initial_moves import *
@@ -238,33 +238,52 @@ if __name__ == '__main__':
     # timeout threshold for searching - milli second
     timer_threshold_ = 100
     
+    # Human Player
     P_1 = HumanPlayer()
+    
+    # Artificial Idiot
     P_2 = MinimaxPlayer(
         score_fn=NullScore(),
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
+        initial_moves_fn=null_im,
+        limited_moves_fn=null_lm,
         timeout=timer_threshold_
     )
     P_3 = AlphaBetaPlayer(
         score_fn=NullScore(),
+        initial_moves_fn=null_im,
+        limited_moves_fn=null_lm,
+        timeout=timer_threshold_
+    )
+   
+    # Artificial Intelligence
+    P_4 = MinimaxPlayer(
+        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
         timeout=timer_threshold_
     )
-    
-    P_5 = MinimaxPlayer(
-        score_fn=NullScore(),
+    P_5 = AlphaBetaPlayer(
+        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
         timeout=timer_threshold_
     )
     P_6 = AlphaBetaPlayer(
-        score_fn=NullScore(),
+        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=im_limited_center_random,
         limited_moves_fn=lm_consider_both,
         timeout=timer_threshold_
     )
+    
+    # # Reinforcement Learning
+    # from players.rl import *
+    # P_7 = QLearningTablePlayer('../data/Qtable3.txt')
+    # P_8 = DQNPlayer(12, 6, load = False)
+    # # store data
+    # P_8.dqn.save_net()
+    # P_8.dqn.store_memory()
 
+    # Play the game
     OnlineGame(
         board_size=board_size_,
         m=m_,

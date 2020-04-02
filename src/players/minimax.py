@@ -27,13 +27,15 @@ class MinimaxPlayer(Player):
                  score_fn=NullScore(),
                  initial_moves_fn = null_im,
                  limited_moves_fn = null_lm,
-                 timeout=10.):
+                 timeout=10.,
+                 verbose=False):
         self.score_fn = score_fn
         self.initial_moves_fn = initial_moves_fn
         self.limited_moves_fn = limited_moves_fn
         self.time_left = None
         self.timer_threshold = timeout
         self.player_mark = None
+        self.verbose = verbose
 
     def get_move(self, board, time_left, n_step):
         """Search for the best move from the available legal moves and return a
@@ -115,9 +117,14 @@ class MinimaxPlayer(Player):
         candidate_moves = self.limited_moves_fn(
             board, self.player_mark, self.n_step)
         for m in candidate_moves:
-            # print('me first do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, depth - 1)
+            
+            # Print information
+            # print('me first do', m)
+            if self.verbose:
+                print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
+                
             if v > best_score:
                 best_score = v
                 best_move = m
@@ -270,10 +277,14 @@ class AlphaBetaPlayer(MinimaxPlayer):
         candidate_moves = self.limited_moves_fn(
             board, self.player_mark, self.n_step)
         for m in candidate_moves:
-            # print('me first do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, alpha, beta, depth - 1)
-            print(v, m)
+
+            # Print information
+            # print('me first do', m)
+            if self.verbose:
+                print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
+            
             if v > best_score:
                 best_score = v
                 best_move = m
