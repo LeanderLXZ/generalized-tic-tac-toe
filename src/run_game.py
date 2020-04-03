@@ -1,6 +1,7 @@
 import requests
 import json
 import time
+import argparse
 from online_game import *
 
 api_url = 'https://www.notexponential.com/aip2pgaming/api/index.php'
@@ -105,16 +106,26 @@ def get_my_games(headers):
 
 if __name__ == '__main__':
 
+    parser = argparse.ArgumentParser(
+        description="Training the model."
+    )
+    parser.add_argument('-t', '--team_id', type=int, metavar='',
+                        help="Set task number.")
+    args = parser.parse_args()
+    
+    if args.team_id:
+        team_id_ = args.team_id
+
     myGames = get_my_games(headers1)['myGames']
     while True:
         new_game = get_my_games(headers1)['myGames'][-1]
         if new_game not in myGames:
             game_id = list(new_game.keys())[0]
             game_team = new_game[game_id].split(':')
-            if game_team[0] == '1218':
+            if game_team[0] == team_id_:
                 player_mark_ = 'O'
                 opponent_team = game_team[1]
-            elif game_team[1] == '1218':
+            elif game_team[1] == team_id_:
                 player_mark_ = 'X'
                 opponent_team = game_team[0]
             print("New game with teamId: {}, gameId: {}".format(opponent_team, game_id))

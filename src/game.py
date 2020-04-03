@@ -94,14 +94,14 @@ if __name__ == '__main__':
         initial_moves_fn=null_im,
         limited_moves_fn=null_lm,
         timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
     P_3 = AlphaBetaPlayer(
         score_fn=NullScore(),
         initial_moves_fn=null_im,
         limited_moves_fn=null_lm,
         timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
    
     # Artificial Intelligence
@@ -110,21 +110,21 @@ if __name__ == '__main__':
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
     P_5 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
         timeout=timer_threshold_,
-        verbose=True
+        verbose=False
     )
     P_6 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
     
     # # Reinforcement Learning

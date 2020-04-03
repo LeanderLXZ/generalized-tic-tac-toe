@@ -144,7 +144,7 @@ class MinimaxPlayer(Player):
 
         if board.is_winner(self.player_mark):
             if depth == self.now_search_depth - 1:
-                print('It\'s time to win!')
+                print('It\'s time to win!', self.now_search_depth, depth)
                 raise WinInAMove()
             return float("inf")
         
@@ -224,8 +224,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
     
         try:
             search_depth = 1
-            self.now_search_depth = search_depth
             while search_depth <= len(board.legal_moves):
+                self.now_search_depth = search_depth
                 print('Now searching depth:', search_depth)
                 best_move = self.alphabeta(board, search_depth)
                 search_depth += 1
@@ -304,7 +304,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
         if board.is_winner(self.player_mark):
             if depth == self.now_search_depth - 1:
-                print('It\'s time to win!')
+                print('It\'s time to win!', self.now_search_depth, depth)
                 raise WinInAMove()
             return float("inf")
         
