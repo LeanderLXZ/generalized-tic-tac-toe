@@ -4,61 +4,6 @@ import time
 import argparse
 from online_game import *
 
-api_url = 'https://www.notexponential.com/aip2pgaming/api/index.php'
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-headers1 = {'User-Agent' : user_agent,
-           'x-api-key' : 'e2cc2a708b2ebaeaea75',
-           'userId' : '932'}
-headers2 = {'User-Agent' : user_agent,
-           'x-api-key' : 'b63d17656c29409d6005',
-           'userId' : '936'}
-
-# time interval for requesting - second
-time_interval_ = 1
-# time limit for each step - milli second
-time_limit_ = 30000
-# timeout threshold for searching - milli second
-timer_threshold_ = 100
-
-team_id_ = '1218'
-board_size_ = (12, 12)
-m_ = 6
-
-# Human Player
-P_1 = HumanPlayer()
-
-# Artificial Idiot
-P_2 = MinimaxPlayer(
-    score_fn=NullScore(),
-    initial_moves_fn=null_im,
-    limited_moves_fn=null_lm,
-    timeout=timer_threshold_,
-    verbose=False
-)
-P_3 = AlphaBetaPlayer(
-    score_fn=NullScore(),
-    initial_moves_fn=null_im,
-    limited_moves_fn=null_lm,
-    timeout=timer_threshold_,
-    verbose=False
-)
-
-# Artificial Intelligence
-P_4 = MinimaxPlayer(
-    score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-    initial_moves_fn=advanced_im,
-    limited_moves_fn=advanced_lm,
-    timeout=timer_threshold_,
-    verbose=False
-)
-P_5 = AlphaBetaPlayer(
-    score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-    initial_moves_fn=advanced_im,
-    limited_moves_fn=advanced_lm,
-    timeout=timer_threshold_,
-    verbose=False
-)
-
 def create_game(teamId1, teamId2):
     # our two teams: 1218, 1220
     data = {'teamId1' : str(teamId1),
@@ -105,12 +50,67 @@ def get_my_games(headers):
     return json.loads(r.text)
 
 if __name__ == '__main__':
+    
+    api_url = 'https://www.notexponential.com/aip2pgaming/api/index.php'
+    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    headers1 = {'User-Agent' : user_agent,
+            'x-api-key' : 'e2cc2a708b2ebaeaea75',
+            'userId' : '932'}
+    headers2 = {'User-Agent' : user_agent,
+            'x-api-key' : 'b63d17656c29409d6005',
+            'userId' : '936'}
+
+    # time interval for requesting - second
+    time_interval_ = 1
+    # time limit for each step - milli second
+    time_limit_ = 30000
+    # timeout threshold for searching - milli second
+    timer_threshold_ = 100
+
+    team_id_ = '1218'
+    board_size_ = (12, 12)
+    m_ = 6
+
+    # Human Player
+    P_1 = HumanPlayer()
+
+    # Artificial Idiot
+    P_2 = MinimaxPlayer(
+        score_fn=NullScore(),
+        initial_moves_fn=null_im,
+        limited_moves_fn=null_lm,
+        timeout=timer_threshold_,
+        verbose=False
+    )
+    P_3 = AlphaBetaPlayer(
+        score_fn=NullScore(),
+        initial_moves_fn=null_im,
+        limited_moves_fn=null_lm,
+        timeout=timer_threshold_,
+        verbose=False
+    )
+
+    # Artificial Intelligence
+    P_4 = MinimaxPlayer(
+        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
+        timeout=timer_threshold_,
+        verbose=False
+    )
+    P_5 = AlphaBetaPlayer(
+        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
+        timeout=timer_threshold_,
+        verbose=False
+    )
 
     parser = argparse.ArgumentParser(
         description="Training the model."
     )
-    parser.add_argument('-t', '--team_id', type=int, metavar='',
-                        help="Set task number.")
+    parser.add_argument('-t', '--team_id', type=str, metavar='')
+    parser.add_argument('-i', '--test', action="store_true")
     args = parser.parse_args()
     
     if args.team_id:
@@ -132,6 +132,10 @@ if __name__ == '__main__':
 
 
             # Play the game
+            player_ = P_2 if args.test else P_5
+            if opponent_team  == '1220':
+                time_limit_ = 3000
+            
             OnlineGame(
                 board_size=board_size_,
                 m=m_,
@@ -142,7 +146,7 @@ if __name__ == '__main__':
                 headers=headers1,
                 time_interval=time_interval_,
                 time_limit=time_limit_
-            ).play_game(P_5)
+            ).play_game(player_)
 
             continue
         else:
