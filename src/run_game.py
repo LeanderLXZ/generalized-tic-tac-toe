@@ -133,8 +133,8 @@ if __name__ == '__main__':
 
             # Play the game
             player_ = P_2 if args.test else P_5
-            if opponent_team  == '1220':
-                time_limit_ = 3000
+            if opponent_team or team_id_ == '1220':
+                time_limit_ = 1000
 
             try:
                 OnlineGame(
@@ -147,8 +147,9 @@ if __name__ == '__main__':
                     headers=headers1,
                     time_interval=time_interval_,
                     time_limit=time_limit_
-                ).play_game(P_5)
-            except:
+                ).play_game(player_)
+            except Exception as e:
+                print(e)
                 pass
 
             continue

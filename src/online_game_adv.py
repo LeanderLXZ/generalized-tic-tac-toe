@@ -201,7 +201,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'X'
     team_id_ = '1220'
-    game_id_ = '1259'
+    game_id_ = '1349'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     # time interval for requesting - second
     time_interval_ = 3 
     # time limit for each step - milli second
-    time_limit_ = 30000
+    time_limit_ = 1000
     # timeout threshold for searching - milli second
     timer_threshold_ = 100
     
@@ -222,15 +222,15 @@ if __name__ == '__main__':
     # Artificial Idiot
     P_2 = MinimaxPlayer(
         score_fn=NullScore(),
-        initial_moves_fn=null_im,
-        limited_moves_fn=null_lm,
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
         verbose=False
     )
     P_3 = AlphaBetaPlayer(
         score_fn=NullScore(),
-        initial_moves_fn=null_im,
-        limited_moves_fn=null_lm,
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
         verbose=False
     )
@@ -270,4 +270,4 @@ if __name__ == '__main__':
         headers=headers_,
         time_interval=time_interval_,
         time_limit=time_limit_
-    ).play_game(P_5)
+    ).play_game(P_2)
