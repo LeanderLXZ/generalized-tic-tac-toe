@@ -7,7 +7,6 @@ from board import Board, GameError
 
 from players.players import HumanPlayer
 from players.minimax import *
-from players.rl import *
 
 from strategies.scores import *
 from strategies.get_initial_moves import *
@@ -111,10 +110,11 @@ class OnlineGame(object):
                     raise GameError('[E] Invalid game id!')
         
         # Update last_moves of the board
+        board = board.get_moved_board(opponent_move, self.opponent_mark)
         board_str_online = self.get_board_str()
         assert board_str_online == board.board_str, \
-            'Board strings are not equal'
-        board = board.get_moved_board(opponent_move, self.opponent_mark)
+            'Board strings are not equal: {}, {}'.format(
+                board_str_online, board.board_str)
         
         # Print information
         print('-' * 70)
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'O'
     team_id_ = '1218'
-    game_id_ = '742'
+    game_id_ = '1225'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -277,4 +277,4 @@ if __name__ == '__main__':
         headers=headers_,
         time_interval=time_interval_,
         time_limit=time_limit_
-    ).play_game(P_3)
+    ).play_game(P_5)

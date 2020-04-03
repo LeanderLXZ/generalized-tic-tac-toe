@@ -6,8 +6,7 @@ import requests
 from board import Board, GameError
 
 from players.players import HumanPlayer
-from players.minimax import MinimaxPlayer, AlphaBetaPlayer
-from players.rl import RLPlayer
+from players.minimax import *
 
 from strategies.scores import *
 from strategies.get_initial_moves import *
@@ -80,9 +79,10 @@ class OnlineGame(object):
             if 'Invalid game id' in j['message']:
                 raise GameError('[E] Invalid game id!')
             
-    def get_opponent_moved_board(self):
+    def get_opponent_moved_board(self, board):
         
         print('Waiting for your opponent...')
+        opponent_move = None
         
         while True:
             # Wait
@@ -96,18 +96,10 @@ class OnlineGame(object):
             
             # If get a correct response
             if j['code'] == 'OK':
-                
-                # Check if the opponent win
-                board_str = self.get_board_str()
-                GameBoard = Board(self.get_board_str(), 
-                                  self.m, 
-                                  last_moves=None)
-                if GameBoard.is_winner(self.opponent_mark):
-                    raise GameError('The winner is Player \'{}\'!'.format(
-                        self.opponent_mark))
-                
+               
                 # If the opponent has already done a move
                 if j['moves'][0]['symbol'] != self.player_mark:
+                    opponent_move = eval(j['moves'][0]['move'])
                     break
             
             # Meet errors
@@ -117,23 +109,21 @@ class OnlineGame(object):
                 if 'Invalid game id' in j['message']:
                     raise GameError('[E] Invalid game id!')
         
-        # Modify the format of last_moves
-        #       None
-        #       {'O': (1, 2), 'X': None}
-        #       {'O': (1, 2), 'X': (2, 3)}
-        if len(j['moves']) == 1:
-            last_moves = {self.player_mark: None,
-                          self.opponent_mark: eval(j['moves'][0]['move'])}
-        elif len(j['moves']) == 2:
-            last_moves = {self.player_mark: eval(j['moves'][1]['move']),
-                          self.opponent_mark: eval(j['moves'][0]['move'])}
-        else:
-            raise ValueError
-        
         # Update last_moves of the board
-        GameBoard.last_moves = last_moves
+        board = board.get_moved_board(opponent_move, self.opponent_mark)
+        board_str_online = self.get_board_str()
+        assert board_str_online == board.board_str, \
+            'Board strings are not equal: {}, {}'.format(
+                board_str_online, board.board_str)
         
-        return GameBoard
+        # Print information
+        print('-' * 70)
+        print('Step: ', board.n_step)
+        print('Opponent\'s Move ({}):'.format(self.opponent_mark),
+                board.last_moves[self.opponent_mark])
+        print(board.board_for_print)
+                
+        return board
         
     def get_board_str(self):
         r = requests.get(self.api_url+'?type=boardString&gameId={}'.format(
@@ -166,55 +156,43 @@ class OnlineGame(object):
         
         # Initialize a new board
         init_board = ('-' * self.board_size[1] + '\n') * self.board_size[0]
-        GameBoard = Board(init_board, self.m)
-        print(GameBoard.board_for_print)
-        
-        # The step of gaming
-        n_step = 0
+        gameBoard = Board(init_board, self.m)
+        print(gameBoard.board_for_print)
         
         try:
             # Not the first player
             if self.player_mark != 'O':
-                GameBoard = self.get_opponent_moved_board()
-                n_step += 1
+                gameBoard = self.get_opponent_moved_board(gameBoard)
             
             # If game is not over, do moves
-            while not self.game_is_over(GameBoard):
+            while not self.game_is_over(gameBoard):
                 move_start = time_millis()
                 time_left = \
                     lambda : self.time_limit - (time_millis() - move_start)
                 
                 # get a move
-                move = player.get_move(GameBoard, time_left, n_step)
-                MovedBoard = GameBoard.get_moved_board(move, self.player_mark)
+                move = player.get_move(gameBoard, time_left)
+                gameBoard = gameBoard.get_moved_board(move, self.player_mark)
                 print('-' * 70)
-                print('Step: ', n_step)
+                print('Step: ', gameBoard.n_step)
                 print('My Move ({}):'.format(self.player_mark), move)
-                print(MovedBoard.board_for_print)
+                print(gameBoard.board_for_print)
                 
                 # post to server
                 self.make_move(move)
-                n_step += 1
                 
                 # Game is over after my move
-                if self.game_is_over(MovedBoard):
+                if self.game_is_over(gameBoard):
                     break
                 
                 # Get the move of opponents
-                GameBoard = self.get_opponent_moved_board()
-                n_step += 1
-                
-                print('-' * 70)
-                print('Step: ', n_step)
-                print('Opponent\'s Move ({}):'.format(self.opponent_mark),
-                      GameBoard.last_moves[self.opponent_mark])
-                print(GameBoard.board_for_print)
+                gameBoard = self.get_opponent_moved_board(gameBoard)
                 
         except GameError as e:
             print('=' * 70)
             print('Game over!', e)
-            if not self.game_is_over(GameBoard):
-                print(GameBoard.board_for_print)
+            if not self.game_is_over(gameBoard):
+                print(gameBoard.board_for_print)
 
 
 if __name__ == '__main__':
@@ -223,7 +201,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'X'
     team_id_ = '1220'
-    game_id_ = '742'
+    game_id_ = '1225'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -299,4 +277,4 @@ if __name__ == '__main__':
         headers=headers_,
         time_interval=time_interval_,
         time_limit=time_limit_
-    ).play_game(P_3)
+    ).play_game(P_5)
