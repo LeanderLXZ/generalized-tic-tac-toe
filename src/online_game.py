@@ -246,33 +246,38 @@ if __name__ == '__main__':
         score_fn=NullScore(),
         initial_moves_fn=null_im,
         limited_moves_fn=null_lm,
-        timeout=timer_threshold_
+        timeout=timer_threshold_, 
+        verbose=True
     )
     P_3 = AlphaBetaPlayer(
         score_fn=NullScore(),
         initial_moves_fn=null_im,
         limited_moves_fn=null_lm,
-        timeout=timer_threshold_
+        timeout=timer_threshold_, 
+        verbose=True
     )
    
     # Artificial Intelligence
     P_4 = MinimaxPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
-        timeout=timer_threshold_
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
+        timeout=timer_threshold_, 
+        verbose=True
     )
     P_5 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
-        timeout=timer_threshold_
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
+        timeout=timer_threshold_, 
+        verbose=True
     )
     P_6 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
-        timeout=timer_threshold_
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
+        timeout=timer_threshold_, 
+        verbose=True
     )
     
     # # Reinforcement Learning

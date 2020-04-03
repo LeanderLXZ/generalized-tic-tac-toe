@@ -220,7 +220,9 @@ class AdvancedScore(Score):
         elif player_mark == 'O':
             line_dict = self.O_straight
         for i in range(4):
+            # print('Line: ', input_array[i])
             if input_array[i] in line_dict.keys():
+                # print('Line is not found: ', input_array[i])
                 score += line_dict[input_array[i]]
         return score
 
@@ -252,6 +254,15 @@ class AdvancedScore(Score):
         # Combine scores
         my_score = my_star_score + my_line_score
         opp_score = opp_star_score + opp_line_score
-        score = my_score - opp_score
+        
+        # print('me:', my_star_score, my_line_score)
+        # print('opp:', opp_star_score, opp_line_score)
+        
+        if player_mark == 'O':
+            a, b = 1.2, 1.
+        if player_mark == 'X':
+            a, b = 1., 1.2
+            
+        score = a * my_score - b * opp_score
         
         return score

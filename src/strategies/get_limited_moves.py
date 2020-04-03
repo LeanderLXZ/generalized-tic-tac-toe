@@ -68,7 +68,7 @@ def lm_consider_self(board, player_mark, n_step):
 
     return moves
     
-def lm_consider_both(board, player_mark, n_step):
+def advanced_lm(board, player_mark, n_step):
     
     # Radius setting
     center_radius = 1
@@ -94,6 +94,11 @@ def lm_consider_both(board, player_mark, n_step):
 
     # Combine two move areas together
     for m in moves_opp:
+        if m not in moves:
+            moves.append(m)
+    
+    # Consider the surronding moves
+    for m in board.surround_moves:
         if m not in moves:
             moves.append(m)
     

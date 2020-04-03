@@ -26,6 +26,10 @@ class Board(object):
         self.width = len(board.split('\n')[0])
         self.height = len(board.split('\n')[:-1])
         self._board_state = self.get_board_state()
+
+        # Surrounding 
+        self.surrond_radius = 1
+        self.surround_moves = []
             
     def get_board_state(self):
         state = np.empty((self.height, self.width), dtype='str')
@@ -52,17 +56,40 @@ class Board(object):
     @property
     def legal_moves(self):
         return np.argwhere(self._board_state == self.BLANK_SPACE)
+
+    def get_surround_moves(self, move):
+        legal_moves = self.legal_moves.tolist()
+        moves = []
+        dist = []
+        for i in range(move[0] - self.surrond_radius, 
+                       move[0] + self.surrond_radius + 1):
+            for j in range(move[1] - self.surrond_radius, 
+                           move[1] + self.surrond_radius + 1):
+                if [i, j] in legal_moves:
+                    moves.append((i, j))
+                    dist.append(max(abs(move[0] - i), abs(move[1] - j)))
+        return [tuple(m) for m in np.array(moves)[np.argsort(dist)]]
         
     def copy(self):
-        return Board(copy(self.board), copy(self.m), copy(self.last_moves))
+        new_board = Board(copy(self.board), copy(self.m), copy(self.last_moves))
+        new_board.surround_moves = self.surround_moves
+        return new_board
 
     def apply_move(self, move, player_mark):
         if self.move_is_legal(move):
+            # Make a move
             self._board_state[move[0], move[1]] = player_mark
             self.board = '\n'.join(
                 [''.join(row) for row in self._board_state]) + '\n'
             self.last_moves[player_mark] = tuple(move)
             self.moved = True
+            
+            # Update surround moves
+            if move in self.surround_moves:
+                self.surround_moves.remove(move)
+            for m in self.get_surround_moves(move):
+                if m not in self.surround_moves:
+                    self.surround_moves.append(m)
         else:
             raise GameError('Illegal move! move: ', move)
 

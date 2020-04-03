@@ -25,7 +25,7 @@ def surround_moves(board, move, radius):
     return moves
 
 
-def im_limited_center_random(board, n_step):
+def advanced_im(board, n_step):
         
     radius = 0
     

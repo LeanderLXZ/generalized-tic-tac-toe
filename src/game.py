@@ -113,22 +113,22 @@ if __name__ == '__main__':
     # Artificial Intelligence
     P_4 = MinimaxPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
         verbose=True
     )
     P_5 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
         verbose=True
     )
     P_6 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-        initial_moves_fn=im_limited_center_random,
-        limited_moves_fn=lm_consider_both,
+        initial_moves_fn=advanced_im,
+        limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
         verbose=True
     )
@@ -142,4 +142,4 @@ if __name__ == '__main__':
     # P_8.dqn.store_memory()
 
     # Play the game
-    play_game(P_1, P_5, board_size_, m_, time_limit_)
+    play_game(P_5, P_1, board_size_, m_, time_limit_)
