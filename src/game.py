@@ -18,8 +18,8 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
 
     # Initialize a game board
     init_board = ('-' * board_size[1] + '\n') * board_size[0]
-    GameBoard = Board(init_board, m)
-    print(GameBoard.board_for_print)
+    gameBoard = Board(init_board, m)
+    print(gameBoard.board_for_print)
 
     # Set the timer
     time_millis = lambda: 1000 * timeit.default_timer()
@@ -33,11 +33,8 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
     player_idx = 1
     player_mark = 'X' 
     
-    # The step of gaming
-    n_step = 0
-    
-    while not GameBoard.is_winner(player_mark) \
-            and len(GameBoard.legal_moves) != 0:
+    while not gameBoard.is_winner(player_mark) \
+            and len(gameBoard.legal_moves) != 0:
 
         print('-' * 70)
         player_idx = player_idx ^ 1
@@ -51,19 +48,16 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
                 time_left = lambda : time_limit - (time_millis() - move_start)
                 
                 # Get a move from player
-                move = players[player_idx][0].get_move(
-                    GameBoard, time_left, n_step)
+                move = players[player_idx][0].get_move(gameBoard, time_left)
                 
                 # Generate a new board
-                GameBoard = GameBoard.get_moved_board(move, player_mark)
+                gameBoard = gameBoard.get_moved_board(move, player_mark)
                 
                 # Display information
-                print('Step: ', n_step)
+                print('Step: ', gameBoard.n_step)
                 print('Move: ', move)
-                print('Last Move: ', GameBoard.last_moves[player_mark])
-                print(GameBoard.board_for_print)
-                
-                n_step += 1
+                print('Last Move: ', gameBoard.last_moves[player_mark])
+                print(gameBoard.board_for_print)
                 
                 break
             
@@ -74,9 +68,9 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
 
     # Game over
     print('=' * 70)
-    if GameBoard.is_winner('O'):
+    if gameBoard.is_winner('O'):
         print('The winner is Player \'O\'!') 
-    elif GameBoard.is_winner('X'):
+    elif gameBoard.is_winner('X'):
         print('The winner is Player \'X\'!') 
     else:
         print('Game over! No winner!') 
@@ -87,7 +81,7 @@ if __name__ == '__main__':
     board_size_ = (12, 12)
     m_ = 6
     # time limit for each step - milli second
-    time_limit_ = 10000
+    time_limit_ = 20000
     # timeout threshold for searching - milli second
     timer_threshold_ = 10
     

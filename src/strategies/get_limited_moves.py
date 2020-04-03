@@ -2,7 +2,7 @@ import numpy as np
 from utils import *
 
 
-def null_lm(board, player_mark, n_step):
+def null_lm(board, player_mark):
     return [tuple(m) for m in board.legal_moves]
 
 
@@ -53,7 +53,7 @@ def surround_star_block(board, move, player_mark,
         return []
     
 
-def lm_consider_self(board, player_mark, n_step):
+def lm_consider_self(board, player_mark):
     
     # Radius setting 
     radius_sur = 2
@@ -68,16 +68,18 @@ def lm_consider_self(board, player_mark, n_step):
 
     return moves
     
-def advanced_lm(board, player_mark, n_step):
+def advanced_lm(board, player_mark):
+    
+    n_step = board.n_step
     
     # Radius setting
     center_radius = 1
-    if n_step < 6:
+    if n_step <= 10:
         radius_sur = 1
         radius_star = 0
-    elif n_step < 16:
+    elif n_step <= 20:
         radius_sur = 1
-        radius_star = 5
+        radius_star = 6
     else:
         radius_sur = 2
         radius_star = 6

@@ -1,8 +1,8 @@
 import numpy as np
 
 
-def null_im(board, n_step):
-    if n_step == 0:
+def null_im(board):
+    if board.n_step == 0:
         return tuple(board.legal_moves[
             np.random.choice(len(board.legal_moves))])
     else:
@@ -25,11 +25,11 @@ def surround_moves(board, move, radius):
     return moves
 
 
-def advanced_im(board, n_step):
+def advanced_im(board):
         
     radius = 0
     
-    if n_step == 0:
+    if board.n_step == 0:
         board_width = board.width
         board_height = board.height
         center_move = (board_height // 2, board_width // 2)

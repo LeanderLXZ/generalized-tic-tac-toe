@@ -15,25 +15,31 @@ class Board(object):
     PLAYER_1 = 'O'
     PLAYER_2 = 'X'
 
-    def __init__(self, board, m, last_moves=None):
+    def __init__(self, board_str, m, last_moves=None):
         self.m = m
-        self.board = board
+        self.board_str = board_str
         self.moved = False
         self.last_moves = last_moves if last_moves else {
             self.PLAYER_1: None,
             self.PLAYER_2: None
         }
-        self.width = len(board.split('\n')[0])
-        self.height = len(board.split('\n')[:-1])
+        self.width = len(board_str.split('\n')[0])
+        self.height = len(board_str.split('\n')[:-1])
         self._board_state = self.get_board_state()
 
         # Surrounding 
         self.surrond_radius = 1
         self.surround_moves = []
+        
+        # history_moves
+        self.history_moves = []
+        
+        # n_step
+        self.n_step = 0
             
     def get_board_state(self):
         state = np.empty((self.height, self.width), dtype='str')
-        for i, row in enumerate(self.board.split('\n')[:-1]):
+        for i, row in enumerate(self.board_str.split('\n')[:-1]):
             for j, cell in enumerate(row):
                 if cell in [self.BLANK_SPACE, self.PLAYER_1, self.PLAYER_2]:
                     state[i, j] = cell
@@ -71,15 +77,20 @@ class Board(object):
         return [tuple(m) for m in np.array(moves)[np.argsort(dist)]]
         
     def copy(self):
-        new_board = Board(copy(self.board), copy(self.m), copy(self.last_moves))
+        new_board = Board(copy(self.board_str), 
+                          copy(self.m), 
+                          copy(self.last_moves))
         new_board.surround_moves = self.surround_moves
+        new_board.history_moves = self.history_moves
+        new_board.n_step = self.n_step
         return new_board
 
     def apply_move(self, move, player_mark):
         if self.move_is_legal(move):
             # Make a move
+            self.n_step += 1
             self._board_state[move[0], move[1]] = player_mark
-            self.board = '\n'.join(
+            self.board_str = '\n'.join(
                 [''.join(row) for row in self._board_state]) + '\n'
             self.last_moves[player_mark] = tuple(move)
             self.moved = True
@@ -90,6 +101,9 @@ class Board(object):
             for m in self.get_surround_moves(move):
                 if m not in self.surround_moves:
                     self.surround_moves.append(m)
+                    
+            # Add move to history_moves
+            self.history_moves.append((player_mark, move))
         else:
             raise GameError('Illegal move! move: ', move)
 

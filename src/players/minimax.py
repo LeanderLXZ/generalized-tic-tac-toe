@@ -37,7 +37,7 @@ class MinimaxPlayer(Player):
         self.player_mark = None
         self.verbose = verbose
 
-    def get_move(self, board, time_left, n_step):
+    def get_move(self, board, time_left):
         """Search for the best move from the available legal moves and return a
         result before the time limit expires.
 
@@ -51,9 +51,6 @@ class MinimaxPlayer(Player):
             A function that returns the number of milliseconds left in the
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
-            
-        n_step : int
-            the index number of step
 
         Returns
         -------
@@ -61,9 +58,7 @@ class MinimaxPlayer(Player):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
-        self.n_step = n_step
-        
-        initial_move = self.initial_moves_fn(board, n_step)
+        initial_move = self.initial_moves_fn(board)
         if initial_move:
             return initial_move
         
@@ -114,8 +109,7 @@ class MinimaxPlayer(Player):
         best_score = float("-inf")
         best_move = (-1, -1)
         
-        candidate_moves = self.limited_moves_fn(
-            board, self.player_mark, self.n_step)
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
             moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, depth - 1)
@@ -146,13 +140,11 @@ class MinimaxPlayer(Player):
             return float("inf")
         
         if depth <= 0:
-            # print('s', self.score_fn.get_score(
-            #     board, self.player_mark, self.n_step))
-            return self.score_fn.get_score(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(board, self.player_mark))
+            return self.score_fn.get_score(board, self.player_mark)
         
         v = float("inf")
-        candidate_moves = self.limited_moves_fn(
-            board, self.opponent_mark, self.n_step)
+        candidate_moves = self.limited_moves_fn(board, self.opponent_mark)
         for m in candidate_moves:
             # print('op do', m)
             moved_board = board.get_moved_board(m, self.opponent_mark)
@@ -171,13 +163,11 @@ class MinimaxPlayer(Player):
             return float("-inf")
         
         if depth <= 0:
-            # print('s', self.score_fn.get_score(
-            #     board, self.player_mark, self.n_step))
-            return self.score_fn.get_score(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(board, self.player_mark))
+            return self.score_fn.get_score(board, self.player_mark)
         
         v = float("-inf")
-        candidate_moves = self.limited_moves_fn(
-            board, self.player_mark, self.n_step)
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
             # print('me do', m)
             moved_board = board.get_moved_board(m, self.player_mark)
@@ -191,7 +181,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
     make sure it returns a good move before the search time limit expires.
     """
 
-    def get_move(self, board, time_left, n_step):
+    def get_move(self, board, time_left):
         """Search for the best move from the available legal moves and return a
         result before the time limit expires.
 
@@ -205,9 +195,6 @@ class AlphaBetaPlayer(MinimaxPlayer):
             A function that returns the number of milliseconds left in the
             current turn. Returning with any less than 0 ms remaining forfeits
             the game.
-            
-        n_step : int
-            the index number of step
 
         Returns
         -------
@@ -215,9 +202,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
-        self.n_step = n_step
         
-        initial_move = self.initial_moves_fn(board, n_step)
+        initial_move = self.initial_moves_fn(board)
         if initial_move:
             return initial_move
         
@@ -274,8 +260,7 @@ class AlphaBetaPlayer(MinimaxPlayer):
         best_score = float("-inf")
         best_move = (-1, -1)
         
-        candidate_moves = self.limited_moves_fn(
-            board, self.player_mark, self.n_step)
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
             moved_board = board.get_moved_board(m, self.player_mark)
             v = self.min_value(moved_board, alpha, beta, depth - 1)
@@ -307,14 +292,12 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return float("inf")
         
         if depth <= 0:
-            # print('s', self.score_fn.get_score(
-            #     board, self.player_mark, self.n_step))
-            return self.score_fn.get_score(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(board, self.player_mark))
+            return self.score_fn.get_score(board, self.player_mark)
         
         v = float("inf")
         
-        candidate_moves = self.limited_moves_fn(
-            board, self.opponent_mark, self.n_step)
+        candidate_moves = self.limited_moves_fn(board, self.opponent_mark)
         for m in candidate_moves:
             # print('op do', m)
             moved_board = board.get_moved_board(m, self.opponent_mark)
@@ -336,14 +319,12 @@ class AlphaBetaPlayer(MinimaxPlayer):
             return float("-inf")
         
         if depth <= 0:
-            # print('s', self.score_fn.get_score(
-            #     board, self.player_mark, self.n_step))
-            return self.score_fn.get_score(board, self.player_mark, self.n_step)
+            # print('s', self.score_fn.get_score(board, self.player_mark))
+            return self.score_fn.get_score(board, self.player_mark)
         
         v = float("-inf")
         
-        candidate_moves = self.limited_moves_fn(
-            board, self.player_mark, self.n_step)
+        candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
             # print('me do', m)
             moved_board = board.get_moved_board(m, self.player_mark)

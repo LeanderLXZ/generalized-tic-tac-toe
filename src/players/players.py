@@ -21,7 +21,6 @@ class Player(object):
     def __init__(self):
         self.player_mark = None
         self.opponent_mark = None
-        self.n_step = 0
         self.initial_moves_fn = null_im
         self.limited_moves_fn = null_lm
         
@@ -29,15 +28,13 @@ class Player(object):
         self.player_mark = player_mark
         self.opponent_mark = get_opponent(player_mark)
         
-    def get_move(self, board, time_left, n_step):
+    def get_move(self, board, time_left):
         raise NotImplementedError
 
 
 class HumanPlayer(Player):
 
-    def get_move(self, board, time_left, n_step):
-        
-        self.n_step = n_step
+    def get_move(self, board, time_left):
         
         input_move = input('Input a move (format: tuple): ')
         try:

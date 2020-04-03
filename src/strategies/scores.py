@@ -5,12 +5,12 @@ from utils import *
 
 class Score(object):
     
-    def get_score(self, board, player_mark, n_step):
+    def get_score(self, board, player_mark):
         raise NotImplementedError
     
 class NullScore(Score):
     
-    def get_score(self, board, player_mark, n_step):
+    def get_score(self, board, player_mark):
         """This heuristic presumes no knowledge for non-terminal states, and
         returns the same uninformative value for all other states.
 
@@ -221,12 +221,16 @@ class AdvancedScore(Score):
             line_dict = self.O_straight
         for i in range(4):
             # print('Line: ', input_array[i])
-            if input_array[i] in line_dict.keys():
-                # print('Line is not found: ', input_array[i])
+            if input_array[i] in line_dict:
                 score += line_dict[input_array[i]]
+            # else:
+            #     print('Line not found:', input_array[i])
         return score
 
-    def get_score(self, board, player_mark, n_step):
+    def get_score(self, board, player_mark):
+        """
+        Get the score.
+        """
         
         # Win
         if board.is_loser(player_mark):
@@ -249,20 +253,33 @@ class AdvancedScore(Score):
         opp_moves_star_8, opp_moves_lines = \
             self.star_8_drect_with_4_lines(board, opp_mark, self.radius)
         opp_star_score = self._get_star_score(opp_moves_star_8, opp_mark)
-        opp_line_score = self._get_line_score(opp_moves_lines, player_mark)
+        opp_line_score = self._get_line_score(opp_moves_lines, opp_mark)
 
         # Combine scores
         my_score = my_star_score + my_line_score
         opp_score = opp_star_score + opp_line_score
         
+        n_step = board.n_step
+        # Even
+        if n_step % 2 == 0:
+            if player_mark == 'O':
+                next_is_me = True
+            else:
+                next_is_me = False
+        # Odd
+        else:
+            if player_mark == 'X':
+                next_is_me = True
+            else:
+                next_is_me = False
+        
+        # print('next_is_me', next_is_me)
         # print('me:', my_star_score, my_line_score)
         # print('opp:', opp_star_score, opp_line_score)
         
-        if player_mark == 'O':
-            a, b = 1.2, 1.
-        if player_mark == 'X':
-            a, b = 1., 1.2
-            
-        score = a * my_score - b * opp_score
+        if next_is_me:
+            score = 1.2 * my_score - opp_score
+        else:
+            score = my_score - 1.2 * opp_score
         
         return score
