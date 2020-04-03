@@ -50,7 +50,7 @@ def get_my_games(headers):
     return json.loads(r.text)
 
 if __name__ == '__main__':
-    
+
     api_url = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     headers1 = {'User-Agent' : user_agent,
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--team_id', type=str, metavar='')
     parser.add_argument('-i', '--test', action="store_true")
     args = parser.parse_args()
-    
+
     if args.team_id:
         team_id_ = args.team_id
 
@@ -135,18 +135,21 @@ if __name__ == '__main__':
             player_ = P_2 if args.test else P_5
             if opponent_team  == '1220':
                 time_limit_ = 3000
-            
-            OnlineGame(
-                board_size=board_size_,
-                m=m_,
-                player_mark=player_mark_,
-                team_id=team_id_,
-                game_id=game_id,
-                api_url=api_url,
-                headers=headers1,
-                time_interval=time_interval_,
-                time_limit=time_limit_
-            ).play_game(player_)
+
+            try:
+                OnlineGame(
+                    board_size=board_size_,
+                    m=m_,
+                    player_mark=player_mark_,
+                    team_id=team_id_,
+                    game_id=game_id,
+                    api_url=api_url,
+                    headers=headers1,
+                    time_interval=time_interval_,
+                    time_limit=time_limit_
+                ).play_game(P_5)
+            except:
+                pass
 
             continue
         else:
