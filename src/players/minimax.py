@@ -6,7 +6,7 @@ from strategies.scores import NullScore
 from strategies.get_initial_moves import null_im
 from strategies.get_limited_moves import null_lm
 
-from players.players import Player, SearchTimeout
+from players.players import Player, SearchTimeout, WinInAMove
 
 
 class MinimaxPlayer(Player):
@@ -36,6 +36,7 @@ class MinimaxPlayer(Player):
         self.timer_threshold = timeout
         self.player_mark = None
         self.verbose = verbose
+        self.now_search_depth = 1
 
     def get_move(self, board, time_left):
         """Search for the best move from the available legal moves and return a
@@ -71,6 +72,7 @@ class MinimaxPlayer(Player):
         try:
             search_depth = 1
             while search_depth <= len(board.legal_moves):
+                self.now_search_depth = search_depth
                 print('Now searching depth:', search_depth)
                 best_move = self.minimax(board, search_depth)
                 search_depth += 1
@@ -111,17 +113,21 @@ class MinimaxPlayer(Player):
         
         candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
-            moved_board = board.get_moved_board(m, self.player_mark)
-            v = self.min_value(moved_board, depth - 1)
-            
-            # Print information
-            # print('me first do', m)
-            if self.verbose:
-                print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
+            try:
+                moved_board = board.get_moved_board(m, self.player_mark)
+                v = self.min_value(moved_board, depth - 1)
                 
-            if v > best_score:
-                best_score = v
+                # Print information
+                # print('me first do', m)
+                if self.verbose:
+                    print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
+                    
+                if v > best_score:
+                    best_score = v
+                    best_move = m
+            except WinInAMove:
                 best_move = m
+                break
         
         if best_move == (-1, -1):
             print('Randomly get a best_move')
@@ -137,6 +143,9 @@ class MinimaxPlayer(Player):
             raise SearchTimeout()
 
         if board.is_winner(self.player_mark):
+            if depth == self.now_search_depth:
+                print('It\'s time to win!')
+                raise WinInAMove()
             return float("inf")
         
         if depth <= 0:
@@ -262,18 +271,22 @@ class AlphaBetaPlayer(MinimaxPlayer):
         
         candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
-            moved_board = board.get_moved_board(m, self.player_mark)
-            v = self.min_value(moved_board, alpha, beta, depth - 1)
+            try:
+                moved_board = board.get_moved_board(m, self.player_mark)
+                v = self.min_value(moved_board, alpha, beta, depth - 1)
 
-            # Print information
-            # print('me first do', m)
-            if self.verbose:
-                print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
-            
-            if v > best_score:
-                best_score = v
+                # Print information
+                # print('me first do', m)
+                if self.verbose:
+                    print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
+                
+                if v > best_score:
+                    best_score = v
+                    best_move = m
+                alpha = max(alpha, v)
+            except WinInAMove:
                 best_move = m
-            alpha = max(alpha, v)
+                break
             
         if best_move == (-1, -1):
             print('Randomly get a best_move')
@@ -289,6 +302,9 @@ class AlphaBetaPlayer(MinimaxPlayer):
             raise SearchTimeout()
 
         if board.is_winner(self.player_mark):
+            if depth == self.now_search_depth:
+                print('It\'s time to win!')
+                raise WinInAMove()
             return float("inf")
         
         if depth <= 0:

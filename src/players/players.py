@@ -12,6 +12,11 @@ class SearchTimeout(Exception):
     pass
 
 
+class WinInAMove(Exception):
+    """Subclass base exception for code clarity. """
+    pass
+
+
 class Player(object):
     
     BLANK_SPACE = '-'

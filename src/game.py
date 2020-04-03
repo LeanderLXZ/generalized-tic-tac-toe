@@ -81,7 +81,7 @@ if __name__ == '__main__':
     board_size_ = (12, 12)
     m_ = 6
     # time limit for each step - milli second
-    time_limit_ = 20000
+    time_limit_ = 30000
     # timeout threshold for searching - milli second
     timer_threshold_ = 10
     
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
-        timeout=timer_threshold_, 
+        timeout=timer_threshold_,
         verbose=True
     )
     P_6 = AlphaBetaPlayer(
@@ -136,4 +136,4 @@ if __name__ == '__main__':
     # P_8.dqn.store_memory()
 
     # Play the game
-    play_game(P_5, P_1, board_size_, m_, time_limit_)
+    play_game(P_5, P_5, board_size_, m_, time_limit_)

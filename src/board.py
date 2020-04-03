@@ -80,9 +80,9 @@ class Board(object):
         new_board = Board(copy(self.board_str), 
                           copy(self.m), 
                           copy(self.last_moves))
-        new_board.surround_moves = self.surround_moves
-        new_board.history_moves = self.history_moves
-        new_board.n_step = self.n_step
+        new_board.surround_moves = copy(self.surround_moves)
+        new_board.history_moves = copy(self.history_moves)
+        new_board.n_step = copy(self.n_step)
         return new_board
 
     def apply_move(self, move, player_mark):

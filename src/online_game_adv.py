@@ -201,7 +201,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'X'
     team_id_ = '1220'
-    game_id_ = '1225'
+    game_id_ = '1259'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     # time interval for requesting - second
     time_interval_ = 3 
     # time limit for each step - milli second
-    time_limit_ = 3000
+    time_limit_ = 30000
     # timeout threshold for searching - milli second
     timer_threshold_ = 100
     
@@ -225,14 +225,14 @@ if __name__ == '__main__':
         initial_moves_fn=null_im,
         limited_moves_fn=null_lm,
         timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
     P_3 = AlphaBetaPlayer(
         score_fn=NullScore(),
         initial_moves_fn=null_im,
         limited_moves_fn=null_lm,
         timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
    
     # Artificial Intelligence
@@ -241,21 +241,14 @@ if __name__ == '__main__':
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
     P_5 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
         timeout=timer_threshold_, 
-        verbose=True
-    )
-    P_6 = AlphaBetaPlayer(
-        score_fn=AdvancedScore(m_, '../data/advanced_score/'),
-        initial_moves_fn=advanced_im,
-        limited_moves_fn=advanced_lm,
-        timeout=timer_threshold_, 
-        verbose=True
+        verbose=False
     )
     
     # # Reinforcement Learning
