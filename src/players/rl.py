@@ -16,7 +16,7 @@ class QLearningTablePlayer(Player):
         self.q_table = self.get_q_table(filename)
         self.player_mark = None
 
-    def get_move(self, board, time_left, n_step):
+    def get_move(self, board, time_left):
         '''
 
         :param board:
