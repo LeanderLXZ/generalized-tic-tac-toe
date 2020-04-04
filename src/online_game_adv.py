@@ -199,9 +199,9 @@ if __name__ == '__main__':
     
     board_size_ = (12, 12)
     m_ = 6
-    player_mark_ = 'X'
+    player_mark_ = 'O'
     team_id_ = '1220'
-    game_id_ = '1425'
+    game_id_ = '1453'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     # time interval for requesting - second
     time_interval_ = 3 
     # time limit for each step - milli second
-    time_limit_ = 1000
+    time_limit_ = 10000
     # timeout threshold for searching - milli second
     timer_threshold_ = 100
     
@@ -270,4 +270,4 @@ if __name__ == '__main__':
         headers=headers_,
         time_interval=time_interval_,
         time_limit=time_limit_
-    ).play_game(P_4)
+    ).play_game(P_1)
