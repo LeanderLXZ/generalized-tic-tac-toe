@@ -124,7 +124,10 @@ class MinimaxPlayer(Player):
 
                 # Print information
                 if self.verbose:
-                    scores[m[0]][m[1]] = '{:.2E}'.format(v)
+                    if -100000. < v < 100000.:
+                        scores[m[0]][m[1]] = '{:.2f}'.format(v)
+                    else:
+                        scores[m[0]][m[1]] = '{:.2E}'.format(v)
                 
                 if v > best_score:
                     best_score = v
@@ -293,7 +296,10 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
                 # Print information
                 if self.verbose:
-                    scores[m[0]][m[1]] = '{:.2E}'.format(v)
+                    if -100000. < v < 100000.:
+                        scores[m[0]][m[1]] = '{:.2f}'.format(v)
+                    else:
+                        scores[m[0]][m[1]] = '{:.2E}'.format(v)
                 
                 if v > best_score:
                     best_score = v
