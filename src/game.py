@@ -117,7 +117,7 @@ if __name__ == '__main__':
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
         timeout=timer_threshold_,
-        verbose=True
+        verbose=False
     )
     P_6 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
@@ -136,4 +136,4 @@ if __name__ == '__main__':
     # P_8.dqn.store_memory()
 
     # Play the game
-    play_game(P_5, P_5, board_size_, m_, time_limit_)
+    play_game(P_4, P_5, board_size_, m_, time_limit_)

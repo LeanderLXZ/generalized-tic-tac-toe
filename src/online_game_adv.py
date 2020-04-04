@@ -201,7 +201,7 @@ if __name__ == '__main__':
     m_ = 6
     player_mark_ = 'X'
     team_id_ = '1220'
-    game_id_ = '1402'
+    game_id_ = '1410'
     api_url_ = 'https://www.notexponential.com/aip2pgaming/api/index.php'
     headers_ = {
         'User-Agent' : 
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     # time interval for requesting - second
     time_interval_ = 3 
     # time limit for each step - milli second
-    time_limit_ = 5000
+    time_limit_ = 1000
     # timeout threshold for searching - milli second
     timer_threshold_ = 100
     
