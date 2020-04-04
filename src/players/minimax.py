@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from utils import print_time
 
@@ -73,6 +74,8 @@ class MinimaxPlayer(Player):
             search_depth = 1
             while search_depth <= len(board.legal_moves):
                 self.now_search_depth = search_depth
+                if self.verbose:
+                    print('-' * 35)
                 print('Now searching depth:', search_depth)
                 best_move = self.minimax(board, search_depth)
                 search_depth += 1
@@ -110,18 +113,19 @@ class MinimaxPlayer(Player):
 
         best_score = float("-inf")
         best_move = (-1, -1)
+
+        scores = board._board_state.tolist()
         
         candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
             try:
                 moved_board = board.get_moved_board(m, self.player_mark)
                 v = self.min_value(moved_board, depth - 1)
-                
+
                 # Print information
-                # print('me first do', m)
                 if self.verbose:
-                    print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
-                    
+                    scores[m[0]][m[1]] = '{:.2E}'.format(v)
+                
                 if v > best_score:
                     best_score = v
                     best_move = m
@@ -129,6 +133,13 @@ class MinimaxPlayer(Player):
                 best_move = m
                 break
         
+        # Print information
+        if self.verbose:
+            print('Scores:')
+            print(pd.DataFrame(scores))
+            print('Best move found in depth {}:'.format(
+                self.now_search_depth), best_move) 
+            
         if best_move == (-1, -1):
             print('Randomly get a best_move')
             best_move = candidate_moves[np.random.choice(len(candidate_moves))]
@@ -226,6 +237,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
             search_depth = 1
             while search_depth <= len(board.legal_moves):
                 self.now_search_depth = search_depth
+                if self.verbose:
+                    print('-' * 35)
                 print('Now searching depth:', search_depth)
                 best_move = self.alphabeta(board, search_depth)
                 search_depth += 1
@@ -269,6 +282,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
 
         best_score = float("-inf")
         best_move = (-1, -1)
+       
+        scores = board._board_state.tolist()
         
         candidate_moves = self.limited_moves_fn(board, self.player_mark)
         for m in candidate_moves:
@@ -277,9 +292,8 @@ class AlphaBetaPlayer(MinimaxPlayer):
                 v = self.min_value(moved_board, alpha, beta, depth - 1)
 
                 # Print information
-                # print('me first do', m)
                 if self.verbose:
-                    print('Move: {:>8} |  Socre: {:>8.2f}'.format(str(m), v))
+                    scores[m[0]][m[1]] = '{:.2E}'.format(v)
                 
                 if v > best_score:
                     best_score = v
@@ -288,6 +302,13 @@ class AlphaBetaPlayer(MinimaxPlayer):
             except WinInAMove:
                 best_move = m
                 break
+        
+        # Print information 
+        if self.verbose:
+            print('Scores:')
+            print(pd.DataFrame(scores))
+            print('Best move found in depth {}:'.format(
+                self.now_search_depth), best_move)
             
         if best_move == (-1, -1):
             print('Randomly get a best_move')

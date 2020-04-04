@@ -106,9 +106,7 @@ if __name__ == '__main__':
         verbose=False
     )
 
-    parser = argparse.ArgumentParser(
-        description="Training the model."
-    )
+    parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--team_id', type=str, metavar='')
     parser.add_argument('-i', '--test', action="store_true")
     args = parser.parse_args()
@@ -134,7 +132,7 @@ if __name__ == '__main__':
             # Play the game
             player_ = P_2 if args.test else P_5
             if opponent_team or team_id_ == '1220':
-                time_limit_ = 1000
+                time_limit_ = 3000
 
             try:
                 OnlineGame(

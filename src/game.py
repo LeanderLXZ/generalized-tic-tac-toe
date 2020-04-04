@@ -55,7 +55,7 @@ def play_game(player_1, player_2, board_size, m, time_limit=TIME_LIMIT_MILLIS):
                 
                 # Display information
                 print('Step: ', gameBoard.n_step)
-                print('Move: ', move)
+                print('Move: ', move, '\'' + player_mark + '\'')
                 print('Last Move: ', gameBoard.last_moves[player_mark])
                 print(gameBoard.board_for_print)
                 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     board_size_ = (12, 12)
     m_ = 6
     # time limit for each step - milli second
-    time_limit_ = 30000
+    time_limit_ = 10000
     # timeout threshold for searching - milli second
     timer_threshold_ = 10
     
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         initial_moves_fn=advanced_im,
         limited_moves_fn=advanced_lm,
         timeout=timer_threshold_,
-        verbose=False
+        verbose=True
     )
     P_6 = AlphaBetaPlayer(
         score_fn=AdvancedScore(m_, '../data/advanced_score/'),
